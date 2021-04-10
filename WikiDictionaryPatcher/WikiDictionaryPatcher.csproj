@@ -87,6 +87,7 @@
 echo d|xcopy ..\..\..\wd_font wd_font</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>echo 123</PreBuildEvent>
+    <PreBuildEvent>rmdir /S /Q wd_font
+del patch.lua</PreBuildEvent>
   </PropertyGroup>
 </Project>
