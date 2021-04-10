@@ -1,4 +1,4 @@
-WikiDic = RegisterMod("WikiDic",1)
+local WikiDic = RegisterMod("WikiDic",1)
 
 WikiDic.targetEntity = nil
 WikiDic.tDistance = 40
