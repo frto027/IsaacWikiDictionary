@@ -15,6 +15,7 @@ namespace WikiDictionaryPatcher
         private static string
             FAKE_LINE_BEGIN = "-- WikiDict MARK START --",
             FAKE_DESC_CONTENT = "-- FAKE_DESC_CONTENT --",
+            FAKE_CONFIG_SEG_1 = "-- FAKE_CONFIG_SEG_1 --",
             FAKE_LINE_END = "-- WikiDict MARK END --";
 #if DEBUG
         private static string
@@ -136,7 +137,16 @@ namespace WikiDictionaryPatcher
             }
 
             Console.WriteLine(desc_dict);
-            AddPatch(lua_path, desc_dict);
+
+            bool use_player_pos =
+                MessageBox.Show("点击“是”显示玩家最近的道具，点击“否”使用鼠标拾取道具。", "道具选择方式？", MessageBoxButtons.YesNo) == DialogResult.Yes;
+            bool mouse_cursor = false;
+            if (!use_player_pos)
+            {
+                mouse_cursor = MessageBox.Show("是否要在屏幕上显示一个鼠标指针，以方便全屏时观察鼠标位置？", "询问", MessageBoxButtons.YesNo) == DialogResult.Yes;
+            }
+
+            AddPatch(lua_path, desc_dict,use_player_pos,mouse_cursor);
             MessageBox.Show("操作完成");
         }
         private static HtmlNode Dfs(HtmlNode node, Func<HtmlNode, bool> f)
@@ -204,7 +214,7 @@ namespace WikiDictionaryPatcher
             catch (IOException) { }
         }
 
-        private static void AddPatch(string luaName, string item_desc)
+        private static void AddPatch(string luaName, string item_desc, bool player_pos, bool draw_mouse)
         {
             string next = "";
             bool isPatching = false;
@@ -242,6 +252,10 @@ namespace WikiDictionaryPatcher
                     {
                         if (line == FAKE_DESC_CONTENT)
                             patch += item_desc + "\n";
+                        else if (line == FAKE_CONFIG_SEG_1) {
+                            patch += "WikiDic.usePlayerPos = " + (player_pos ? "true" : "false") + "\n";
+                            patch += "WikiDic.drawMouse = " + (draw_mouse ? "true" : "false") + "\n";
+                        }
                         else
                             patch += line + "\n";
                     }

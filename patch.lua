@@ -1,4 +1,4 @@
-local WikiDic = RegisterMod("WikiDic",1)
+WikiDic = RegisterMod("WikiDic",1)
 
 WikiDic.targetEntity = nil
 WikiDic.tDistance = 40
@@ -6,10 +6,21 @@ WikiDic.offsetCenter = Vector(0,-30)
 WikiDic.renderOffset = Vector(0,-30)
 WikiDic.font = nil
 WikiDic.lineWrap = 200
-WikiDic.renderPos = Vector(80,80)
-WikiDic.iconOffset = Vector(0,0)
+WikiDic.renderPos = Vector(80,50)
+WikiDic.iconNoShopItemOffset = Vector(-12,30)
+WikiDic.iconOffset = Vector(-12,15)
+WikiDic.cursur_sprite = nil
 
 WikiDic.nullVector = Vector(0,0)
+
+-- FAKE_CONFIG_SEG_1 --
+
+--WikiDic.usePlayerPos = true --mouse or player pos
+--WikiDic.drawMouse = true
+
+if WikiDic.usePlayerPos then
+	WikiDic.tDistance = 100
+end
 
 
 WikiDic.desc = {
@@ -22,7 +33,7 @@ function WikiDic:Update()
 		return
 	end
 
-	local tpos = Input.GetMousePosition(true)
+	local tpos = WikiDic.usePlayerPos and Isaac.GetPlayer(0).Position or Input.GetMousePosition(true)
 	for _,e in pairs(Isaac.GetRoomEntities()) do
 		if e.Type == 5 and e.Variant == 100 then
 			if (e.Position + WikiDic.offsetCenter - tpos):Length() < WikiDic.tDistance then
@@ -76,6 +87,17 @@ function WikiDic:RenderCallback()
 		end
 		
 	end
+
+	if WikiDic.drawMouse and (Game():GetLevel():GetCurses() & LevelCurse.CURSE_OF_BLIND) == 0 then
+		if WikiDic.cursur_sprite == nil then
+			WikiDic.cursur_sprite = Sprite()
+			WikiDic.cursur_sprite:Load("gfx/ui/cursor.anm2",true)
+		end
+		WikiDic.cursur_sprite:Play(WikiDic.targetEntity and "Clicked" or "Idle",true)
+		local mousePos = Isaac.WorldToRenderPosition(Input.GetMousePosition(true))
+		WikiDic.cursur_sprite:Render(mousePos,WikiDic.nullVector,WikiDic.nullVector)
+	end
+
 	if WikiDic.targetEntity ~= nil then
 		local rpos = Isaac.WorldToRenderPosition(WikiDic.targetEntity.Position + WikiDic.renderOffset)
 		local desc = WikiDic.desc[WikiDic.targetEntity.SubType] or (WikiDic.targetEntity.SubType .. "号道具\n\n没有收录")
@@ -83,11 +105,12 @@ function WikiDic:RenderCallback()
 		local next_line = WikiDic.renderPos --Vector(rpos.X,rpos.Y)
 
 		--WikiDic.targetEntity:GetSprite():Render(next_line,WikiDic.nullVector,WikiDic.nullVector)
-		WikiDic.targetEntity:GetSprite():RenderLayer(1,next_line + WikiDic.iconOffset,WikiDic.nullVector,WikiDic.nullVector)
+		local icon_offset = (WikiDic.targetEntity.Variant == 100 and not WikiDic.targetEntity:ToPickup():IsShopItem()) and WikiDic.iconNoShopItemOffset or WikiDic.iconOffset
+		WikiDic.targetEntity:GetSprite():RenderLayer(1,next_line + icon_offset,WikiDic.nullVector,WikiDic.nullVector)
 
 		repeat
 			local next = string.find(desc,"\n",last+1)
-			WikiDic.font:DrawStringUTF8 (string.sub(desc,last+1,next),next_line.X,next_line.Y,KColor(1,1,1,1,0,0,0),0,true)
+			WikiDic.font:DrawStringUTF8 (string.sub(desc,last+1,next),next_line.X,next_line.Y,KColor(1,1,1,0.6,0,0,0),0,true)
 			next_line = next_line + Vector(0,WikiDic.font:GetLineHeight())
 			last = next
 		until last == nil
