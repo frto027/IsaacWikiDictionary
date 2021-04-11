@@ -6,6 +6,8 @@
 
 图鉴信息来源于[灰机wiki](https://isaac.huijiwiki.com/wiki/%E9%81%93%E5%85%B7)。
 
+英文图鉴信息来源于Fandom wiki:[Binding of Isaac: Rebirth Wiki is a Fandom Gaming Community](https://bindingofisaacrebirth.fandom.com/wiki/Binding_of_Isaac:_Rebirth_Wiki)
+
 ![预览](install_preview.gif)
 
 # 版权声明

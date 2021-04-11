@@ -10,6 +10,13 @@ using System.Windows.Forms;
 
 namespace WikiDictionaryPatcher
 {
+    class ItemDesc
+    {
+        public int id;
+        public string name;
+        public string desc;
+    }
+
     class Program
     {
         private static string
@@ -31,7 +38,7 @@ namespace WikiDictionaryPatcher
         static void Main(string[] args)
         {
             MessageBox.Show("版权声明：此图鉴程序著作权归属@frto027(bilibili/github/gitee：frto027、贴吧id：frt-027)所有，且保留追究责任的权利，任何形式的转载需注明出处。\n图鉴中展示的物品条例版权归原作者所有。");
-            MessageBox.Show("此版本图鉴数据来源：灰机wiki(https://isaac.huijiwiki.com/)");
+            MessageBox.Show("此版本图鉴数据来源(致谢)：\n灰机wiki(https://isaac.huijiwiki.com/)\nBinding of Isaac: Rebirth Wiki is a Fandom Gaming Community(https://bindingofisaacrebirth.fandom.com/)");
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Filter = "以撒主程序(isaac-ng.exe)|";
             dialog.Title = "请选择以撒的主程序isaac-ng.exe(支持的游戏版本：胎衣+或忏悔)";
@@ -79,129 +86,74 @@ namespace WikiDictionaryPatcher
             {
                 return;
             }
-            string desc_dict = "";
-            //爬！
+
+            bool getHuijiWikiDesc = MessageBox.Show("是否下载灰机wiki信息？（点否将下载英文维基fandomWiki上的内容）", "询问", MessageBoxButtons.YesNo) == DialogResult.Yes;
+            bool useFandomWiki = true;
+            if (getHuijiWikiDesc)
             {
-                Console.WriteLine("正在下载灰机wiki中的道具信息...");
-                WebRequest request = HttpWebRequest.Create("https://isaac.huijiwiki.com/wiki/%E9%81%93%E5%85%B7");
-                string webPage = new StreamReader(request.GetResponse().GetResponseStream()).ReadToEnd();
+                useFandomWiki = MessageBox.Show("是否下载英文维基fandomWiki上的内容，作为补充内容？", "询问", MessageBoxButtons.YesNo) == DialogResult.Yes;
+            }
 
-                var html = new HtmlAgilityPack.HtmlDocument();
-                html.LoadHtml(webPage);
+            Dictionary<int, ItemDesc> descs = new Dictionary<int, ItemDesc>();
+            Dictionary<int, ItemDesc> trinket_descs = new Dictionary<int, ItemDesc>();
+            if (getHuijiWikiDesc)
+            {
+                LinkedList<ItemDesc> huijiItemDesc = GetHuijiWikiItemDesc();
+                LinkedList<ItemDesc> huijiTrinketDesc = GetHuijiWikiTrinketDesc();
 
-                var table = Dfs(html.DocumentNode, d => d.Name == "table" && d.InnerText.StartsWith("名称"));
-                if (table == null)
+                foreach(var item in huijiItemDesc)
                 {
-                    MessageBox.Show("没有在灰机wiki道具页上发现道具表格，这意味着此工具和wiki不匹配。当前版本的工具已经无法使用。");
-                    return;
+                    descs.Add(item.id, item);
                 }
-
-                foreach (HtmlNode tr in table.ChildNodes)
+                foreach (var item in huijiTrinketDesc)
                 {
-                    if (tr.Name != "tr")
-                        continue;
-                    //skip table head
-                    if (Dfs(tr, d => d.Name == "th") != null)
-                        continue;
+                    trinket_descs.Add(item.id, item);
+                }
+            }
 
-                    string item_name = "未知";
-                    string item_desc = "未知";
-                    int item_id = -1;
 
-                    int td_i = 0;
-                    foreach (HtmlNode td in tr.ChildNodes)
+            if (useFandomWiki)
+            {
+                LinkedList<ItemDesc> fandomDesc = GetFandomWikiItemDesc();
+                LinkedList<ItemDesc> fandomTrinketDescs = GetFandomWikiTrinketDesc();
+
+                foreach (var item in fandomDesc)
+                {
+                    if (!descs.ContainsKey(item.id))
+                        descs.Add(item.id, item);
+                    else
                     {
-                        if (td.Name != "td")
-                            continue;
-                        if (td_i == 0)
-                        {
-                            string chinese = null;
-                            foreach (var item in td.ChildNodes)
-                            {
-                                if (chinese != null)
-                                    chinese += item.InnerText;
-                                else if (item.Name == "br")
-                                    chinese = "";
-                            }
-                            item_name = chinese;
-                        }
-                        if (td_i == 2)
-                            item_id = int.Parse(td.InnerText);
-                        if (td_i == 5)
-                            item_desc = td.InnerText.Replace("&#160;", "");
-                        td_i++;
+                        if (descs[item.id].desc == null || descs[item.id].desc == "")
+                            descs[item.id].desc = item.desc;
                     }
-
-                    //Console.WriteLine(item_id + "\t" + item_name + "\t" + item_desc);
-                    desc_dict += string.Format("[{0}] = \"{1}\",\n", item_id, item_name + "\\n" + item_desc.Replace("\n", "\\n"));
                 }
+                foreach (var item in fandomTrinketDescs)
+                {
+                    if (!trinket_descs.ContainsKey(item.id))
+                        trinket_descs.Add(item.id, item);
+                    else
+                    {
+                        if (trinket_descs[item.id].desc == null || trinket_descs[item.id].desc == "")
+                            trinket_descs[item.id].desc = item.desc;
+                    }
+                }
+            }
 
-                Console.WriteLine(desc_dict);
-
+            string desc_dict = "";
+            foreach(var item in descs)
+            {
+                string d = item.Value.name + "\n" + item.Value.desc;
+                d = d.Replace("\\", "\\\\").Replace("\n", "\\n").Replace("\"", "\\\"");
+                desc_dict += string.Format("[{0}]=\"{1}\",\n", item.Value.id, d);
+            }
+            string trinket_desc = "";
+            foreach (var item in trinket_descs)
+            {
+                string d = item.Value.name + "\n" + item.Value.desc;
+                d = d.Replace("\\", "\\\\").Replace("\n", "\\n").Replace("\"", "\\\"");
+                trinket_desc += string.Format("[{0}]=\"{1}\",\n", item.Value.id, d);
             }
             //=======trinket
-
-            Console.WriteLine("正在下载灰机Wiki中的饰品信息");
-
-            //再爬！
-            string trinket_desc = "";
-            {
-                Console.WriteLine("正在下载灰机wiki中的道具信息...");
-                WebRequest request = HttpWebRequest.Create("https://isaac.huijiwiki.com/wiki/%E9%A5%B0%E5%93%81");
-                string webPage = new StreamReader(request.GetResponse().GetResponseStream()).ReadToEnd();
-
-                var html = new HtmlAgilityPack.HtmlDocument();
-                html.LoadHtml(webPage);
-
-                var table = Dfs(html.DocumentNode, d => d.Name == "table" && d.InnerText.StartsWith("名称"));
-                if (table == null)
-                {
-                    MessageBox.Show("没有在灰机wiki道具页上发现饰品表格，这意味着此工具和wiki不匹配。当前版本的工具已经无法使用。");
-                    return;
-                }
-
-                foreach (HtmlNode tr in table.ChildNodes)
-                {
-                    if (tr.Name != "tr")
-                        continue;
-                    //skip table head
-                    if (Dfs(tr, d => d.Name == "th") != null)
-                        continue;
-
-                    string item_name = "未知";
-                    string item_desc = "未知";
-                    int item_id = -1;
-
-                    int td_i = 0;
-                    foreach (HtmlNode td in tr.ChildNodes)
-                    {
-                        if (td.Name != "td")
-                            continue;
-                        if (td_i == 0)
-                        {
-                            string chinese = null;
-                            foreach (var item in td.ChildNodes)
-                            {
-                                if (chinese != null)
-                                    chinese += item.InnerText;
-                                else if (item.Name == "br")
-                                    chinese = "";
-                            }
-                            item_name = chinese;
-                        }
-                        if (td_i == 2)
-                            item_id = int.Parse(td.InnerText);
-                        if (td_i == 5)
-                            item_desc = td.InnerText.Replace("&#160;", "");
-                        td_i++;
-                    }
-
-                    //Console.WriteLine(item_id + "\t" + item_name + "\t" + item_desc);
-                    trinket_desc += string.Format("[{0}] = \"{1}\",\n", item_id, item_name + "\\n" + item_desc.Replace("\n", "\\n"));
-                }
-
-                Console.WriteLine(trinket_desc);
-            }
 
             bool use_player_pos =
                 MessageBox.Show("点击“是”显示玩家最近的道具，点击“否”使用鼠标拾取道具。", "道具选择方式？", MessageBoxButtons.YesNo) == DialogResult.Yes;
@@ -212,6 +164,231 @@ namespace WikiDictionaryPatcher
             }
             AddPatch(lua_path, desc_dict, trinket_desc, use_player_pos,mouse_cursor);
             MessageBox.Show("操作完成");
+        }
+
+        private static LinkedList<ItemDesc> GetFandomWikiItemDesc()
+        {
+            Console.WriteLine("正在下载fandom wiki中的道具信息...");
+            WebRequest request = HttpWebRequest.Create("https://bindingofisaacrebirth.fandom.com/wiki/Items");
+            string webPage = new StreamReader(request.GetResponse().GetResponseStream()).ReadToEnd();
+
+            var html = new HtmlAgilityPack.HtmlDocument();
+            html.LoadHtml(webPage);
+
+            var tables = new LinkedList<HtmlNode>();
+
+            Dfs(html.DocumentNode, d =>
+            {
+                if (d.Name == "table" && d.InnerText.Substring(0, 20).Contains("Name"))
+                    tables.AddLast(d);
+                return false;
+            });
+            var ret = new LinkedList<ItemDesc>();
+            foreach(var table in tables)
+            {
+                foreach (HtmlNode tr in Dfs(table,n=>n.Name == "tbody")?.ChildNodes)
+                {
+                    if (tr.Name != "tr")
+                        continue;
+                    //skip table head
+                    if (Dfs(tr, d => d.Name == "th") != null)
+                        continue;
+
+                    string item_name = "未知";
+                    string item_desc = "未知";
+                    int item_id = -1;
+
+                    int td_i = 0;
+                    foreach (HtmlNode td in tr.ChildNodes)
+                    {
+                        if (td.Name != "td")
+                            continue;
+                        if (td_i == 0)
+                            item_name = td.InnerText.Replace("\n"," ");
+                        if (td_i == 1)
+                            item_id = int.Parse(td.InnerText.Replace("\n","").Substring("5.100.".Length));
+                        if (td_i == 4)
+                            item_desc = td.InnerText.Replace("&#160;", "");
+                        td_i++;
+                    }
+
+                    ret.AddLast(new ItemDesc() { id = item_id, name = item_name, desc = item_desc });
+                    //Console.WriteLine(item_id + "\t" + item_name + "\t" + item_desc);
+                    Console.WriteLine(string.Format("[{0}] = \"{1}\",", item_id, item_name + "\\n" + item_desc.Replace("\n", "\\n")));
+                }
+            }
+            return ret;
+        }
+        private static LinkedList<ItemDesc> GetFandomWikiTrinketDesc()
+        {
+            Console.WriteLine("正在下载fandom wiki中的饰品信息...");
+            WebRequest request = HttpWebRequest.Create("https://bindingofisaacrebirth.fandom.com/wiki/Trinkets");
+            string webPage = new StreamReader(request.GetResponse().GetResponseStream()).ReadToEnd();
+
+            var html = new HtmlAgilityPack.HtmlDocument();
+            html.LoadHtml(webPage);
+
+            var tables = new LinkedList<HtmlNode>();
+
+            Dfs(html.DocumentNode, d =>
+            {
+                if (d.Name == "table" && d.InnerText.Substring(0, 20).Contains("Name"))
+                    tables.AddLast(d);
+                return false;
+            });
+            var ret = new LinkedList<ItemDesc>();
+            foreach (var table in tables)
+            {
+                foreach (HtmlNode tr in Dfs(table, n => n.Name == "tbody")?.ChildNodes)
+                {
+                    if (tr.Name != "tr")
+                        continue;
+                    //skip table head
+                    if (Dfs(tr, d => d.Name == "th") != null)
+                        continue;
+
+                    string item_name = "未知";
+                    string item_desc = "未知";
+                    int item_id = -1;
+
+                    int td_i = 0;
+                    foreach (HtmlNode td in tr.ChildNodes)
+                    {
+                        if (td.Name != "td")
+                            continue;
+                        if (td_i == 0)
+                            item_name = td.InnerText.Replace("\n", " ");
+                        if (td_i == 1)
+                            item_id = int.Parse(td.InnerText.Replace("\n", "").Substring("5.350.".Length));
+                        if (td_i == 4)
+                            item_desc = td.InnerText.Replace("&#160;", "");
+                        td_i++;
+                    }
+
+                    ret.AddLast(new ItemDesc() { id = item_id, name = item_name, desc = item_desc });
+                    //Console.WriteLine(item_id + "\t" + item_name + "\t" + item_desc);
+                    Console.WriteLine(string.Format("[{0}] = \"{1}\",", item_id, item_name + "\\n" + item_desc.Replace("\n", "\\n")));
+                }
+            }
+            return ret;
+        }
+        public static LinkedList<ItemDesc> GetHuijiWikiItemDesc()
+        {
+            var ret = new LinkedList<ItemDesc>();
+            Console.WriteLine("正在下载灰机wiki中的道具信息...");
+            WebRequest request = HttpWebRequest.Create("https://isaac.huijiwiki.com/wiki/%E9%A5%B0%E5%93%81");
+            string webPage = new StreamReader(request.GetResponse().GetResponseStream()).ReadToEnd();
+
+            var html = new HtmlAgilityPack.HtmlDocument();
+            html.LoadHtml(webPage);
+
+            var table = Dfs(html.DocumentNode, d => d.Name == "table" && d.InnerText.StartsWith("名称"));
+            if (table == null)
+            {
+                MessageBox.Show("没有在灰机wiki道具页上发现饰品表格，这意味着此工具和wiki不匹配。当前版本的工具已经无法使用。");
+                return null;
+            }
+
+            foreach (HtmlNode tr in table.ChildNodes)
+            {
+                if (tr.Name != "tr")
+                    continue;
+                //skip table head
+                if (Dfs(tr, d => d.Name == "th") != null)
+                    continue;
+
+                string item_name = "未知";
+                string item_desc = "未知";
+                int item_id = -1;
+
+                int td_i = 0;
+                foreach (HtmlNode td in tr.ChildNodes)
+                {
+                    if (td.Name != "td")
+                        continue;
+                    if (td_i == 0)
+                    {
+                        string chinese = null;
+                        foreach (var item in td.ChildNodes)
+                        {
+                            if (chinese != null)
+                                chinese += item.InnerText;
+                            else if (item.Name == "br")
+                                chinese = "";
+                        }
+                        item_name = chinese;
+                    }
+                    if (td_i == 2)
+                        item_id = int.Parse(td.InnerText);
+                    if (td_i == 5)
+                        item_desc = td.InnerText.Replace("&#160;", "");
+                    td_i++;
+                }
+
+                ret.AddLast(new ItemDesc() { id = item_id, name = item_name, desc = item_desc });
+                //Console.WriteLine(item_id + "\t" + item_name + "\t" + item_desc);
+                Console.WriteLine(string.Format("[{0}] = \"{1}\",", item_id, item_name + "\\n" + item_desc.Replace("\n", "\\n")));
+            }
+            return ret;
+        }
+        public static LinkedList<ItemDesc> GetHuijiWikiTrinketDesc()
+        {
+            var ret = new LinkedList<ItemDesc>();
+            Console.WriteLine("正在下载灰机wiki中的饰品信息...");
+            WebRequest request = HttpWebRequest.Create("https://isaac.huijiwiki.com/wiki/%E9%81%93%E5%85%B7");
+            string webPage = new StreamReader(request.GetResponse().GetResponseStream()).ReadToEnd();
+
+            var html = new HtmlAgilityPack.HtmlDocument();
+            html.LoadHtml(webPage);
+
+            var table = Dfs(html.DocumentNode, d => d.Name == "table" && d.InnerText.StartsWith("名称"));
+            if (table == null)
+            {
+                MessageBox.Show("没有在灰机wiki道具页上发现道具表格，这意味着此工具和wiki不匹配。当前版本的工具已经无法使用。");
+                return null;
+            }
+
+            foreach (HtmlNode tr in table.ChildNodes)
+            {
+                if (tr.Name != "tr")
+                    continue;
+                //skip table head
+                if (Dfs(tr, d => d.Name == "th") != null)
+                    continue;
+
+                string item_name = "未知";
+                string item_desc = "未知";
+                int item_id = -1;
+
+                int td_i = 0;
+                foreach (HtmlNode td in tr.ChildNodes)
+                {
+                    if (td.Name != "td")
+                        continue;
+                    if (td_i == 0)
+                    {
+                        string chinese = null;
+                        foreach (var item in td.ChildNodes)
+                        {
+                            if (chinese != null)
+                                chinese += item.InnerText;
+                            else if (item.Name == "br")
+                                chinese = "";
+                        }
+                        item_name = chinese;
+                    }
+                    if (td_i == 2)
+                        item_id = int.Parse(td.InnerText);
+                    if (td_i == 5)
+                        item_desc = td.InnerText.Replace("&#160;", "");
+                    td_i++;
+                }
+
+                ret.AddLast(new ItemDesc() { id = item_id, name = item_name, desc = item_desc });
+                //Console.WriteLine(item_id + "\t" + item_name + "\t" + item_desc);
+                Console.WriteLine(string.Format("[{0}] = \"{1}\",", item_id, item_name + "\\n" + item_desc.Replace("\n", "\\n")));
+            }
+            return ret;
         }
         private static HtmlNode Dfs(HtmlNode node, Func<HtmlNode, bool> f)
         {
