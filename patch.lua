@@ -41,7 +41,7 @@ function WikiDic:Update()
 	local tpos = WikiDic.usePlayerPos and Isaac.GetPlayer(0).Position or Input.GetMousePosition(true)
 	for _,e in pairs(Isaac.GetRoomEntities()) do
 		if e.Type == 5 and (e.Variant == 100 or e.Variant == 350) then
-			if e.Variant == 100 and (Game():GetLevel():GetCurses() & LevelCurse.CURSE_OF_BLIND) ~= 0 then
+			if e.Variant == 100 and (e.SubType == 0 or (Game():GetLevel():GetCurses() & LevelCurse.CURSE_OF_BLIND) ~= 0) then
 				-- do nothing in CURSE_OF_BLIND
 			else
 				if (e.Position + WikiDic.offsetCenter - tpos):Length() < WikiDic.tDistance then
