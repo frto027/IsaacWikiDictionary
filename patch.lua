@@ -107,7 +107,7 @@ function WikiDic:RenderCallback()
 			WikiDic.cursur_sprite:Load("gfx/ui/cursor.anm2",true)
 		end
 		WikiDic.cursur_sprite:Play(WikiDic.targetEntity and "Clicked" or "Idle",true)
-		local mousePos = Isaac.WorldToRenderPosition(Input.GetMousePosition(true))
+		local mousePos = Isaac.WorldToScreen(Input.GetMousePosition(true))
 		WikiDic.cursur_sprite:Render(mousePos,WikiDic.nullVector,WikiDic.nullVector)
 	end
 
