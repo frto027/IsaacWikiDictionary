@@ -276,7 +276,7 @@ namespace WikiDictionaryPatcher
         {
             var ret = new LinkedList<ItemDesc>();
             Console.WriteLine("正在下载灰机wiki中的道具信息...");
-            WebRequest request = HttpWebRequest.Create("https://isaac.huijiwiki.com/wiki/%E9%A5%B0%E5%93%81");
+            WebRequest request = HttpWebRequest.Create("https://isaac.huijiwiki.com/wiki/%E9%81%93%E5%85%B7");
             string webPage = new StreamReader(request.GetResponse().GetResponseStream()).ReadToEnd();
 
             var html = new HtmlAgilityPack.HtmlDocument();
@@ -335,7 +335,7 @@ namespace WikiDictionaryPatcher
         {
             var ret = new LinkedList<ItemDesc>();
             Console.WriteLine("正在下载灰机wiki中的饰品信息...");
-            WebRequest request = HttpWebRequest.Create("https://isaac.huijiwiki.com/wiki/%E9%81%93%E5%85%B7");
+            WebRequest request = HttpWebRequest.Create("https://isaac.huijiwiki.com/wiki/%E9%A5%B0%E5%93%81");
             string webPage = new StreamReader(request.GetResponse().GetResponseStream()).ReadToEnd();
 
             var html = new HtmlAgilityPack.HtmlDocument();
