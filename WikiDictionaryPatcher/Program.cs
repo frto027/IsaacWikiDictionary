@@ -15,6 +15,7 @@ namespace WikiDictionaryPatcher
         private static string
             FAKE_LINE_BEGIN = "-- WikiDict MARK START --",
             FAKE_DESC_CONTENT = "-- FAKE_DESC_CONTENT --",
+            FAKE_TRINKET_DESC_CONTENT = "-- FAKE_TRINKET_CONTENT --",
             FAKE_CONFIG_SEG_1 = "-- FAKE_CONFIG_SEG_1 --",
             FAKE_LINE_END = "-- WikiDict MARK END --";
 #if DEBUG
@@ -78,65 +79,129 @@ namespace WikiDictionaryPatcher
             {
                 return;
             }
-
-            //爬！
-            Console.WriteLine("正在下载灰机wiki中的道具信息...");
-            WebRequest request = HttpWebRequest.Create("https://isaac.huijiwiki.com/wiki/%E9%81%93%E5%85%B7");
-            string webPage = new StreamReader(request.GetResponse().GetResponseStream()).ReadToEnd();
-
-            var html = new HtmlAgilityPack.HtmlDocument();
-            html.LoadHtml(webPage);
-
-            var table = Dfs(html.DocumentNode, d => d.Name == "table" && d.InnerText.StartsWith("名称"));
-            if (table == null)
-            {
-                MessageBox.Show("没有在灰机wiki道具页上发现道具表格，这意味着此工具和wiki不匹配。当前版本的工具已经无法使用。");
-                return;
-            }
-
             string desc_dict = "";
-            
-            foreach (HtmlNode tr in table.ChildNodes)
+            //爬！
             {
-                if (tr.Name != "tr")
-                    continue;
-                //skip table head
-                if (Dfs(tr, d => d.Name == "th") != null)
-                    continue;
+                Console.WriteLine("正在下载灰机wiki中的道具信息...");
+                WebRequest request = HttpWebRequest.Create("https://isaac.huijiwiki.com/wiki/%E9%81%93%E5%85%B7");
+                string webPage = new StreamReader(request.GetResponse().GetResponseStream()).ReadToEnd();
 
-                string item_name = "未知";
-                string item_desc = "未知";
-                int item_id = -1;
+                var html = new HtmlAgilityPack.HtmlDocument();
+                html.LoadHtml(webPage);
 
-                int td_i = 0;
-                foreach (HtmlNode td in tr.ChildNodes)
+                var table = Dfs(html.DocumentNode, d => d.Name == "table" && d.InnerText.StartsWith("名称"));
+                if (table == null)
                 {
-                    if (td.Name != "td")
-                        continue;
-                    if (td_i == 0)
-                    {
-                        string chinese = null;
-                        foreach (var item in td.ChildNodes)
-                        {
-                            if (chinese != null)
-                                chinese += item.InnerText;
-                            else if (item.Name == "br")
-                                chinese = "";
-                        }
-                        item_name = chinese;
-                    }
-                    if (td_i == 2)
-                        item_id = int.Parse(td.InnerText);
-                    if (td_i == 5)
-                        item_desc = td.InnerText.Replace("&#160;", "");
-                    td_i++;
+                    MessageBox.Show("没有在灰机wiki道具页上发现道具表格，这意味着此工具和wiki不匹配。当前版本的工具已经无法使用。");
+                    return;
                 }
 
-                //Console.WriteLine(item_id + "\t" + item_name + "\t" + item_desc);
-                desc_dict += string.Format("[{0}] = \"{1}\",\n", item_id, item_name + "\\n" + item_desc.Replace("\n", "\\n"));
-            }
+                foreach (HtmlNode tr in table.ChildNodes)
+                {
+                    if (tr.Name != "tr")
+                        continue;
+                    //skip table head
+                    if (Dfs(tr, d => d.Name == "th") != null)
+                        continue;
 
-            Console.WriteLine(desc_dict);
+                    string item_name = "未知";
+                    string item_desc = "未知";
+                    int item_id = -1;
+
+                    int td_i = 0;
+                    foreach (HtmlNode td in tr.ChildNodes)
+                    {
+                        if (td.Name != "td")
+                            continue;
+                        if (td_i == 0)
+                        {
+                            string chinese = null;
+                            foreach (var item in td.ChildNodes)
+                            {
+                                if (chinese != null)
+                                    chinese += item.InnerText;
+                                else if (item.Name == "br")
+                                    chinese = "";
+                            }
+                            item_name = chinese;
+                        }
+                        if (td_i == 2)
+                            item_id = int.Parse(td.InnerText);
+                        if (td_i == 5)
+                            item_desc = td.InnerText.Replace("&#160;", "");
+                        td_i++;
+                    }
+
+                    //Console.WriteLine(item_id + "\t" + item_name + "\t" + item_desc);
+                    desc_dict += string.Format("[{0}] = \"{1}\",\n", item_id, item_name + "\\n" + item_desc.Replace("\n", "\\n"));
+                }
+
+                Console.WriteLine(desc_dict);
+
+            }
+            //=======trinket
+
+            Console.WriteLine("正在下载灰机Wiki中的饰品信息");
+
+            //再爬！
+            string trinket_desc = "";
+            {
+                Console.WriteLine("正在下载灰机wiki中的道具信息...");
+                WebRequest request = HttpWebRequest.Create("https://isaac.huijiwiki.com/wiki/%E9%A5%B0%E5%93%81");
+                string webPage = new StreamReader(request.GetResponse().GetResponseStream()).ReadToEnd();
+
+                var html = new HtmlAgilityPack.HtmlDocument();
+                html.LoadHtml(webPage);
+
+                var table = Dfs(html.DocumentNode, d => d.Name == "table" && d.InnerText.StartsWith("名称"));
+                if (table == null)
+                {
+                    MessageBox.Show("没有在灰机wiki道具页上发现饰品表格，这意味着此工具和wiki不匹配。当前版本的工具已经无法使用。");
+                    return;
+                }
+
+                foreach (HtmlNode tr in table.ChildNodes)
+                {
+                    if (tr.Name != "tr")
+                        continue;
+                    //skip table head
+                    if (Dfs(tr, d => d.Name == "th") != null)
+                        continue;
+
+                    string item_name = "未知";
+                    string item_desc = "未知";
+                    int item_id = -1;
+
+                    int td_i = 0;
+                    foreach (HtmlNode td in tr.ChildNodes)
+                    {
+                        if (td.Name != "td")
+                            continue;
+                        if (td_i == 0)
+                        {
+                            string chinese = null;
+                            foreach (var item in td.ChildNodes)
+                            {
+                                if (chinese != null)
+                                    chinese += item.InnerText;
+                                else if (item.Name == "br")
+                                    chinese = "";
+                            }
+                            item_name = chinese;
+                        }
+                        if (td_i == 2)
+                            item_id = int.Parse(td.InnerText);
+                        if (td_i == 5)
+                            item_desc = td.InnerText.Replace("&#160;", "");
+                        td_i++;
+                    }
+
+                    //Console.WriteLine(item_id + "\t" + item_name + "\t" + item_desc);
+                    trinket_desc += string.Format("[{0}] = \"{1}\",\n", item_id, item_name + "\\n" + item_desc.Replace("\n", "\\n"));
+                }
+
+                Console.WriteLine(trinket_desc);
+            }
 
             bool use_player_pos =
                 MessageBox.Show("点击“是”显示玩家最近的道具，点击“否”使用鼠标拾取道具。", "道具选择方式？", MessageBoxButtons.YesNo) == DialogResult.Yes;
@@ -145,8 +210,7 @@ namespace WikiDictionaryPatcher
             {
                 mouse_cursor = MessageBox.Show("是否要在屏幕上显示一个鼠标指针，以方便全屏时观察鼠标位置？", "询问", MessageBoxButtons.YesNo) == DialogResult.Yes;
             }
-
-            AddPatch(lua_path, desc_dict,use_player_pos,mouse_cursor);
+            AddPatch(lua_path, desc_dict, trinket_desc, use_player_pos,mouse_cursor);
             MessageBox.Show("操作完成");
         }
         private static HtmlNode Dfs(HtmlNode node, Func<HtmlNode, bool> f)
@@ -214,7 +278,7 @@ namespace WikiDictionaryPatcher
             catch (IOException) { }
         }
 
-        private static void AddPatch(string luaName, string item_desc, bool player_pos, bool draw_mouse)
+        private static void AddPatch(string luaName, string item_desc, string trinket_desc, bool player_pos, bool draw_mouse)
         {
             string next = "";
             bool isPatching = false;
@@ -256,7 +320,10 @@ namespace WikiDictionaryPatcher
                             patch += "WikiDic.usePlayerPos = " + (player_pos ? "true" : "false") + "\n";
                             patch += "WikiDic.drawMouse = " + (draw_mouse ? "true" : "false") + "\n";
                         }
-                        else
+                        else if(line == FAKE_TRINKET_DESC_CONTENT)
+                        {
+                            patch += trinket_desc + "\n";
+                        }else
                             patch += line + "\n";
                     }
                 }
