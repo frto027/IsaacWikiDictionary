@@ -19,6 +19,7 @@ WikiDic.nullVector = Vector(0,0)
 
 --WikiDic.usePlayerPos = true --mouse or player pos
 --WikiDic.drawMouse = true
+--WikiDic.useDefaultFont = true
 
 if WikiDic.usePlayerPos then
 	WikiDic.tDistance = 100
@@ -60,6 +61,18 @@ function WikiDic:Update()
 end
 
 function WikiDic:FixReturn(descs)
+	local byte_0 = string.byte("0")
+	local byte_9 = string.byte("9")
+	local byte_a = string.byte("a")
+	local byte_z = string.byte("z")
+	local byte_A = string.byte("A")
+	local byte_Z = string.byte("Z")
+	local byte_period = string.byte(".")
+	local byte_comma = string.byte(",")
+	local byte_space = string.byte(" ")
+	local is_word = function(b)
+		return (byte_0 <= b and b <= byte_9) or (byte_A <= b and b <= byte_Z) or (byte_a <= b and b <= byte_z) or b == byte_comma or b == byte_period
+	end
 	for i,desc in pairs(descs) do
 		local last = 1
 		local new_desc = ""
@@ -82,11 +95,27 @@ function WikiDic:FixReturn(descs)
 				do
 					break_pos = break_pos - 1
 				end
-
-				new_desc = new_desc .. string.sub(current_line,1,break_pos) .. "\n"
+				-- don't break at word or number end
+				if is_word(string.byte(current_line,break_pos)) then
+					while break_pos < #current_line and is_word(string.byte(current_line,break_pos + 1)) do
+						break_pos = break_pos + 1
+					end
+				end
+				--remove start space
+				local new_line_begin = 1
+				while new_line_begin < break_pos and string.byte(current_line,new_line_begin) == byte_space do
+					new_line_begin = new_line_begin + 1
+				end
+				new_desc = new_desc .. string.sub(current_line,new_line_begin,break_pos) .. "\n"
 				current_line = string.sub(current_line,break_pos + 1)
 			end
-			new_desc = new_desc .. current_line
+			--remove start space
+			local new_line_begin = 1
+			while new_line_begin < #current_line and string.byte(current_line,new_line_begin) == byte_space do
+				new_line_begin = new_line_begin + 1
+			end
+
+			new_desc = new_desc .. string.sub(current_line, new_line_begin)
 			last = next
 		until last == nil
 		descs[i] = new_desc
@@ -97,7 +126,7 @@ end
 function WikiDic:RenderCallback()
 	if WikiDic.font == nil then
 		WikiDic.font = Font()
-		WikiDic.font:Load("wd_font/dx_wdic.fnt")
+		WikiDic.font:Load(WikiDic.useDefaultFont and "font/terminus.fnt" or "wd_font/dx_wdic.fnt")
 		WikiDic:FixReturn(WikiDic.desc)
 		WikiDic:FixReturn(WikiDic.trinketDesc)
 	end
@@ -145,7 +174,7 @@ function WikiDic:RenderCallback()
 		end
 		repeat
 			local next = string.find(desc,"\n",last+1)
-			WikiDic.font:DrawStringScaledUTF8(string.sub(desc,last+1,next),next_line.X,next_line.Y,0.5,0.5,KColor(1,1,1,0.6,0,0,0),0,true)
+			WikiDic.font:DrawStringScaledUTF8(string.sub(desc,last+1,(string.sub(desc,next or #desc,next) == '\n') and (next or #desc) - 1 or next),next_line.X,next_line.Y,0.5,0.5,KColor(1,1,1,0.6,0,0,0),0,true)
 			next_line = next_line + Vector(0,WikiDic.font:GetLineHeight()*0.5)
 			last = next
 		until last == nil

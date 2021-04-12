@@ -162,7 +162,13 @@ namespace WikiDictionaryPatcher
             {
                 mouse_cursor = MessageBox.Show("是否要在屏幕上显示一个鼠标指针，以方便全屏时观察鼠标位置？", "询问", MessageBoxButtons.YesNo) == DialogResult.Yes;
             }
-            AddPatch(lua_path, desc_dict, trinket_desc, use_player_pos,mouse_cursor);
+            bool use_default_font = false;
+            if(!getHuijiWikiDesc && useFandomWiki)
+            {
+                use_default_font = MessageBox.Show("您选择了只使用英文维基，是否要使用游戏默认的英文字体呢？如果点击是，则使用游戏的默认字体，点击否，则使用图鉴程序自带的等线中文字体。","字体询问",MessageBoxButtons.YesNo) == DialogResult.Yes;
+            }
+
+            AddPatch(lua_path, desc_dict, trinket_desc, use_player_pos,mouse_cursor,use_default_font);
             MessageBox.Show("操作完成");
         }
 
@@ -455,7 +461,7 @@ namespace WikiDictionaryPatcher
             catch (IOException) { }
         }
 
-        private static void AddPatch(string luaName, string item_desc, string trinket_desc, bool player_pos, bool draw_mouse)
+        private static void AddPatch(string luaName, string item_desc, string trinket_desc, bool player_pos, bool draw_mouse,bool use_default_font)
         {
             string next = "";
             bool isPatching = false;
@@ -496,6 +502,7 @@ namespace WikiDictionaryPatcher
                         else if (line == FAKE_CONFIG_SEG_1) {
                             patch += "WikiDic.usePlayerPos = " + (player_pos ? "true" : "false") + "\n";
                             patch += "WikiDic.drawMouse = " + (draw_mouse ? "true" : "false") + "\n";
+                            patch += "WikiDic.useDefaultFont = " + (use_default_font ? "true" : "false") + "\n";
                         }
                         else if(line == FAKE_TRINKET_DESC_CONTENT)
                         {
@@ -517,12 +524,15 @@ namespace WikiDictionaryPatcher
                     writer.Write(next);
                 }
             }
-
-            Directory.CreateDirectory(luaName + @"\..\..\wd_font");
-            var fontDir = new DirectoryInfo(RES_FONT_FOLDER_PATCH);
-            foreach(FileInfo font in fontDir.GetFiles())
+            //patch font
+            if (!use_default_font)
             {
-                font.CopyTo(luaName + @"\..\..\wd_font\" + font.Name);
+                Directory.CreateDirectory(luaName + @"\..\..\wd_font");
+                var fontDir = new DirectoryInfo(RES_FONT_FOLDER_PATCH);
+                foreach (FileInfo font in fontDir.GetFiles())
+                {
+                    font.CopyTo(luaName + @"\..\..\wd_font\" + font.Name);
+                }
             }
         }
 
