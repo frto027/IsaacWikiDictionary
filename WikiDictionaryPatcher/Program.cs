@@ -168,7 +168,9 @@ namespace WikiDictionaryPatcher
                 use_default_font = MessageBox.Show("您选择了只使用英文维基，是否要使用游戏默认的英文字体呢？如果点击是，则使用游戏的默认字体，点击否，则使用图鉴程序自带的等线中文字体。","字体询问",MessageBoxButtons.YesNo) == DialogResult.Yes;
             }
 
-            AddPatch(lua_path, desc_dict, trinket_desc, use_player_pos,mouse_cursor,use_default_font);
+            bool use_half_size_font = MessageBox.Show("是否使用全尺寸字体？点否将使得图鉴信息变为一半大小进行显示(半尺寸大小显示时，请关闭游戏的FILTER/滤光器选项，以免字体被平滑，影响辨识度)。", "尺寸询问？", MessageBoxButtons.YesNo) == DialogResult.No;
+
+            AddPatch(lua_path, desc_dict, trinket_desc, use_player_pos,mouse_cursor,use_default_font,use_half_size_font);
             MessageBox.Show("操作完成");
         }
 
@@ -461,7 +463,7 @@ namespace WikiDictionaryPatcher
             catch (IOException) { }
         }
 
-        private static void AddPatch(string luaName, string item_desc, string trinket_desc, bool player_pos, bool draw_mouse,bool use_default_font)
+        private static void AddPatch(string luaName, string item_desc, string trinket_desc, bool player_pos, bool draw_mouse,bool use_default_font,bool use_half_size_font)
         {
             string next = "";
             bool isPatching = false;
@@ -503,6 +505,7 @@ namespace WikiDictionaryPatcher
                             patch += "WikiDic.usePlayerPos = " + (player_pos ? "true" : "false") + "\n";
                             patch += "WikiDic.drawMouse = " + (draw_mouse ? "true" : "false") + "\n";
                             patch += "WikiDic.useDefaultFont = " + (use_default_font ? "true" : "false") + "\n";
+                            patch += "WikiDic.useHalfSizeFont = " + (use_half_size_font ? "true" : "false") + "\n";
                         }
                         else if(line == FAKE_TRINKET_DESC_CONTENT)
                         {

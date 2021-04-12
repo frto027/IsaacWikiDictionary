@@ -6,20 +6,26 @@ WikiDic.offsetCenter = Vector(0,-30)
 WikiDic.renderOffset = Vector(0,-30)
 WikiDic.font = nil
 WikiDic.lineWrap = 200
-WikiDic.renderPos = Vector(70,45)
-WikiDic.iconNoShopItemOffset = Vector(-8,17)
-WikiDic.iconOffset = Vector(-8,8)
-WikiDic.trinketIconOffset = Vector(-8,6)
+WikiDic.renderPos = Vector(80,50)
+WikiDic.iconNoShopItemOffset = Vector(-12,30)
+WikiDic.iconOffset = Vector(-12,15)
+WikiDic.trinketIconOffset = Vector(-15,15)
 WikiDic.cursur_sprite = nil
-WikiDic.iconScale = Vector(0.5,0.5)
+WikiDic.iconScale = Vector(1,1)
+WikiDic.fontScale = 1
 
 WikiDic.nullVector = Vector(0,0)
+
+WikiDic.usePlayerPos = false
+WikiDic.drawMouse = true
+WikiDic.useDefaultFont = false
 
 -- FAKE_CONFIG_SEG_1 --
 
 --WikiDic.usePlayerPos = true --mouse or player pos
 --WikiDic.drawMouse = true
 --WikiDic.useDefaultFont = true
+--WikiDic.useHalfSizeFont = true
 
 if WikiDic.usePlayerPos then
 	WikiDic.tDistance = 100
@@ -174,8 +180,8 @@ function WikiDic:RenderCallback()
 		end
 		repeat
 			local next = string.find(desc,"\n",last+1)
-			WikiDic.font:DrawStringScaledUTF8(string.sub(desc,last+1,(string.sub(desc,next or #desc,next) == '\n') and (next or #desc) - 1 or next),next_line.X,next_line.Y,0.5,0.5,KColor(1,1,1,0.6,0,0,0),0,true)
-			next_line = next_line + Vector(0,WikiDic.font:GetLineHeight()*0.5)
+			WikiDic.font:DrawStringScaledUTF8(string.sub(desc,last+1,(string.sub(desc,next or #desc,next) == '\n') and (next or #desc) - 1 or next),next_line.X,next_line.Y,WikiDic.fontScale,WikiDic.fontScale,KColor(1,1,1,0.6,0,0,0),0,true)
+			next_line = next_line + Vector(0,WikiDic.font:GetLineHeight()*WikiDic.fontScale)
 			last = next
 		until last == nil
 		-- WikiDic.font:DrawStringUTF8 (desc,rpos.X,rpos.Y,KColor(1,1,1,1,0,0,0),0,true)
