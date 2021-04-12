@@ -31,6 +31,14 @@ if WikiDic.usePlayerPos then
 	WikiDic.tDistance = 100
 end
 
+if WikiDic.useHalfSizeFont then
+	WikiDic.renderPos = Vector(70,45)
+	WikiDic.iconNoShopItemOffset = Vector(-8,17)
+	WikiDic.iconOffset = Vector(-8,8)
+	WikiDic.trinketIconOffset = Vector(-8,6)
+	WikiDic.iconScale = Vector(0.5,0.5)
+	WikiDic.fontScale = 0.5
+end
 
 WikiDic.desc = {
 -- FAKE_DESC_CONTENT --
