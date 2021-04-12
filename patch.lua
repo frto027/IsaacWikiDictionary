@@ -6,11 +6,12 @@ WikiDic.offsetCenter = Vector(0,-30)
 WikiDic.renderOffset = Vector(0,-30)
 WikiDic.font = nil
 WikiDic.lineWrap = 200
-WikiDic.renderPos = Vector(80,50)
-WikiDic.iconNoShopItemOffset = Vector(-12,30)
-WikiDic.iconOffset = Vector(-12,15)
-WikiDic.trinketIconOffset = Vector(-15,15)
+WikiDic.renderPos = Vector(70,45)
+WikiDic.iconNoShopItemOffset = Vector(-8,17)
+WikiDic.iconOffset = Vector(-8,8)
+WikiDic.trinketIconOffset = Vector(-8,6)
 WikiDic.cursur_sprite = nil
+WikiDic.iconScale = Vector(0.5,0.5)
 
 WikiDic.nullVector = Vector(0,0)
 
@@ -127,16 +128,25 @@ function WikiDic:RenderCallback()
 		if WikiDic.targetEntity.Variant == 100 then
 			--WikiDic.targetEntity:GetSprite():Render(next_line,WikiDic.nullVector,WikiDic.nullVector)
 			local icon_offset = (not WikiDic.targetEntity:ToPickup():IsShopItem()) and WikiDic.iconNoShopItemOffset or WikiDic.iconOffset
-			WikiDic.targetEntity:GetSprite():RenderLayer(1,next_line + icon_offset,WikiDic.nullVector,WikiDic.nullVector)
+			local sprite = WikiDic.targetEntity:GetSprite()
+			-- I have to create a new vector, instead of use the old one.
+			local oldScale = Vector(sprite.Scale.X,sprite.Scale.Y)
+			sprite.Scale = WikiDic.iconScale
+			sprite:RenderLayer(1,next_line + icon_offset,WikiDic.nullVector,WikiDic.nullVector)
+			sprite.Scale = oldScale
 		end
 		if WikiDic.targetEntity.Variant == 350 then
 			local icon_offset = WikiDic.trinketIconOffset
-			WikiDic.targetEntity:GetSprite():RenderLayer(0,next_line + icon_offset,WikiDic.nullVector,WikiDic.nullVector)
+			local sprite = WikiDic.targetEntity:GetSprite()
+			local oldScale = Vector(sprite.Scale.X,sprite.Scale.Y)
+			sprite.Scale = WikiDic.iconScale
+			sprite:RenderLayer(0,next_line + icon_offset,WikiDic.nullVector,WikiDic.nullVector)
+			sprite.Scale = oldScale
 		end
 		repeat
 			local next = string.find(desc,"\n",last+1)
-			WikiDic.font:DrawStringUTF8 (string.sub(desc,last+1,next),next_line.X,next_line.Y,KColor(1,1,1,0.6,0,0,0),0,true)
-			next_line = next_line + Vector(0,WikiDic.font:GetLineHeight())
+			WikiDic.font:DrawStringScaledUTF8(string.sub(desc,last+1,next),next_line.X,next_line.Y,0.5,0.5,KColor(1,1,1,0.6,0,0,0),0,true)
+			next_line = next_line + Vector(0,WikiDic.font:GetLineHeight()*0.5)
 			last = next
 		until last == nil
 		-- WikiDic.font:DrawStringUTF8 (desc,rpos.X,rpos.Y,KColor(1,1,1,1,0,0,0),0,true)
