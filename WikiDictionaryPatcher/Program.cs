@@ -17,6 +17,13 @@ namespace WikiDictionaryPatcher
         public string desc;
     }
 
+    public class DicOptions
+    {
+        public bool canceled;
+        public bool getHuijiWikiDesc, useFandomWikiDesc;
+        public bool use_player_pos, draw_mouse, use_default_font, use_half_size_font;
+    }
+
     class Program
     {
         private static string
@@ -81,8 +88,14 @@ namespace WikiDictionaryPatcher
                     return;
                 }
             }
+            DicOptions options = new DicOptions() { canceled = false };
 
-            if(MessageBox.Show("是否下载wiki信息并添加游戏图鉴？","询问",MessageBoxButtons.YesNo) == DialogResult.No)
+            new ConfigForm(options).ShowDialog();
+
+            if (options.canceled)
+                return;
+            /*
+            if (MessageBox.Show("是否下载wiki信息并添加游戏图鉴？","询问",MessageBoxButtons.YesNo) == DialogResult.No)
             {
                 return;
             }
@@ -93,6 +106,11 @@ namespace WikiDictionaryPatcher
             {
                 useFandomWiki = MessageBox.Show("是否下载英文维基fandomWiki上的内容，作为补充内容？", "询问", MessageBoxButtons.YesNo) == DialogResult.Yes;
             }
+            */
+
+            bool getHuijiWikiDesc = options.getHuijiWikiDesc;
+            bool useFandomWiki = options.useFandomWikiDesc;
+
 
             Dictionary<int, ItemDesc> descs = new Dictionary<int, ItemDesc>();
             Dictionary<int, ItemDesc> trinket_descs = new Dictionary<int, ItemDesc>();
@@ -155,6 +173,7 @@ namespace WikiDictionaryPatcher
             }
             //=======trinket
 
+            /*
             bool use_player_pos =
                 MessageBox.Show("点击“是”显示玩家最近的道具，点击“否”使用鼠标拾取道具。", "道具选择方式？", MessageBoxButtons.YesNo) == DialogResult.Yes;
             bool mouse_cursor = false;
@@ -169,8 +188,10 @@ namespace WikiDictionaryPatcher
             }
 
             bool use_half_size_font = MessageBox.Show("是否使用全尺寸字体？点否将使得图鉴信息变为一半大小进行显示(半尺寸大小显示时，请关闭游戏的FILTER/滤光器选项，以免字体被平滑，影响辨识度)。", "尺寸询问？", MessageBoxButtons.YesNo) == DialogResult.No;
+            */
 
-            AddPatch(lua_path, desc_dict, trinket_desc, use_player_pos,mouse_cursor,use_default_font,use_half_size_font);
+
+            AddPatch(lua_path, desc_dict, trinket_desc, options);
             MessageBox.Show("操作完成");
         }
 
@@ -463,7 +484,7 @@ namespace WikiDictionaryPatcher
             catch (IOException) { }
         }
 
-        private static void AddPatch(string luaName, string item_desc, string trinket_desc, bool player_pos, bool draw_mouse,bool use_default_font,bool use_half_size_font)
+        private static void AddPatch(string luaName, string item_desc, string trinket_desc, DicOptions dicOptions)
         {
             string next = "";
             bool isPatching = false;
@@ -502,10 +523,10 @@ namespace WikiDictionaryPatcher
                         if (line == FAKE_DESC_CONTENT)
                             patch += item_desc + "\n";
                         else if (line == FAKE_CONFIG_SEG_1) {
-                            patch += "WikiDic.usePlayerPos = " + (player_pos ? "true" : "false") + "\n";
-                            patch += "WikiDic.drawMouse = " + (draw_mouse ? "true" : "false") + "\n";
-                            patch += "WikiDic.useDefaultFont = " + (use_default_font ? "true" : "false") + "\n";
-                            patch += "WikiDic.useHalfSizeFont = " + (use_half_size_font ? "true" : "false") + "\n";
+                            patch += "WikiDic.usePlayerPos = " + (dicOptions.use_player_pos ? "true" : "false") + "\n";
+                            patch += "WikiDic.drawMouse = " + (dicOptions.draw_mouse ? "true" : "false") + "\n";
+                            patch += "WikiDic.useDefaultFont = " + (dicOptions.use_default_font ? "true" : "false") + "\n";
+                            patch += "WikiDic.useHalfSizeFont = " + (dicOptions.use_half_size_font ? "true" : "false") + "\n";
                         }
                         else if(line == FAKE_TRINKET_DESC_CONTENT)
                         {
@@ -528,7 +549,7 @@ namespace WikiDictionaryPatcher
                 }
             }
             //patch font
-            if (!use_default_font)
+            if (!dicOptions.use_default_font)
             {
                 Directory.CreateDirectory(luaName + @"\..\..\wd_font");
                 var fontDir = new DirectoryInfo(RES_FONT_FOLDER_PATCH);
