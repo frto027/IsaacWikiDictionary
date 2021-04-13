@@ -13,6 +13,7 @@ WikiDic.trinketIconOffset = Vector(-15,15)
 WikiDic.cursur_sprite = nil
 WikiDic.iconScale = Vector(1,1)
 WikiDic.fontScale = 1
+WikiDic.distYMulti = 1
 
 WikiDic.nullVector = Vector(0,0)
 
@@ -28,7 +29,8 @@ WikiDic.useDefaultFont = false
 --WikiDic.useHalfSizeFont = true
 
 if WikiDic.usePlayerPos then
-	WikiDic.tDistance = 100
+	WikiDic.tDistance = 180
+	WikiDic.distYMulti = 2 --y is far than screen distance
 end
 
 if WikiDic.useHalfSizeFont then
@@ -60,7 +62,9 @@ function WikiDic:Update()
 			if e.Variant == 100 and (e.SubType == 0 or (Game():GetLevel():GetCurses() & LevelCurse.CURSE_OF_BLIND) ~= 0) then
 				-- do nothing in CURSE_OF_BLIND
 			else
-				if (e.Position + WikiDic.offsetCenter - tpos):Length() < WikiDic.tDistance then
+				local distVec = (e.Position + WikiDic.offsetCenter - tpos)
+				distVec.Y = distVec.Y * WikiDic.distYMulti
+				if distVec:Length() < WikiDic.tDistance then
 					if WikiDic.targetEntity == nil or (
 							(e.Position + WikiDic.offsetCenter - tpos):Length() <
 							(WikiDic.targetEntity.Position + WikiDic.offsetCenter - tpos):Length()
