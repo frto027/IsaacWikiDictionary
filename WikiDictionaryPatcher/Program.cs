@@ -22,6 +22,7 @@ namespace WikiDictionaryPatcher
         public bool canceled;
         public bool getHuijiWikiDesc, useFandomWikiDesc;
         public bool use_player_pos, draw_mouse, use_default_font, use_half_size_font;
+        public bool use_bigger_font;
     }
 
     class Program
@@ -527,6 +528,7 @@ namespace WikiDictionaryPatcher
                             patch += "WikiDic.drawMouse = " + (dicOptions.draw_mouse ? "true" : "false") + "\n";
                             patch += "WikiDic.useDefaultFont = " + (dicOptions.use_default_font ? "true" : "false") + "\n";
                             patch += "WikiDic.useHalfSizeFont = " + (dicOptions.use_half_size_font ? "true" : "false") + "\n";
+                            patch += "WikiDic.useBiggerSizeFont = " + (dicOptions.use_bigger_font ? "true" : "false") + "\n";
                         }
                         else if(line == FAKE_TRINKET_DESC_CONTENT)
                         {

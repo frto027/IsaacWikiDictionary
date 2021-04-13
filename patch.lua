@@ -27,10 +27,12 @@ WikiDic.useDefaultFont = false
 --WikiDic.drawMouse = true
 --WikiDic.useDefaultFont = true
 --WikiDic.useHalfSizeFont = true
+--WikiDic.useBiggerSizeFont = true
 
 if WikiDic.usePlayerPos then
 	WikiDic.tDistance = 180
-	WikiDic.distYMulti = 2 --y is far than screen distance
+	WikiDic.offsetCenter = Vector(0,0)
+	WikiDic.distYMulti = 1.6 --y is far than screen distance
 end
 
 if WikiDic.useHalfSizeFont then
@@ -40,6 +42,14 @@ if WikiDic.useHalfSizeFont then
 	WikiDic.trinketIconOffset = Vector(-8,6)
 	WikiDic.iconScale = Vector(0.5,0.5)
 	WikiDic.fontScale = 0.5
+end
+if WikiDic.useBiggerSizeFont then
+	WikiDic.renderPos = Vector(80,45)
+	WikiDic.iconNoShopItemOffset = Vector(-8,40)
+	WikiDic.iconOffset = Vector(-15,20)
+	WikiDic.trinketIconOffset = Vector(-10,12)
+	WikiDic.iconScale = Vector(1.2,1.2)
+	WikiDic.fontScale = 1.2
 end
 
 WikiDic.desc = {

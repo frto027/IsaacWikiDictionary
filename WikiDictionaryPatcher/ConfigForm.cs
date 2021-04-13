@@ -23,6 +23,7 @@ namespace WikiDictionaryPatcher
             options.use_half_size_font = halfFontSize.Checked;
             options.use_player_pos = playerPos.Checked;
             options.draw_mouse = drawMouseYes.Checked;
+            options.use_bigger_font = biggerFontSize.Checked;
         }
 
         private void radioButton8_CheckedChanged(object sender, EventArgs e)
@@ -50,6 +51,7 @@ namespace WikiDictionaryPatcher
             options.use_half_size_font = halfFontSize.Checked;
             options.use_player_pos = playerPos.Checked;
             options.draw_mouse = drawMouseYes.Checked;
+            options.use_bigger_font = biggerFontSize.Checked;
             Close();
         }
 

@@ -29,8 +29,8 @@
         private void InitializeComponent()
         {
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.useHuijiYse = new System.Windows.Forms.RadioButton();
             this.useHuijiNo = new System.Windows.Forms.RadioButton();
+            this.useHuijiYse = new System.Windows.Forms.RadioButton();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.useFandomNo = new System.Windows.Forms.RadioButton();
             this.useFandomYes = new System.Windows.Forms.RadioButton();
@@ -49,6 +49,7 @@
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.defaultFont = new System.Windows.Forms.RadioButton();
             this.dxFont = new System.Windows.Forms.RadioButton();
+            this.biggerFontSize = new System.Windows.Forms.RadioButton();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -68,6 +69,17 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "是否下载灰机wiki信息？";
             // 
+            // useHuijiNo
+            // 
+            this.useHuijiNo.AutoSize = true;
+            this.useHuijiNo.Location = new System.Drawing.Point(145, 20);
+            this.useHuijiNo.Name = "useHuijiNo";
+            this.useHuijiNo.Size = new System.Drawing.Size(35, 16);
+            this.useHuijiNo.TabIndex = 2;
+            this.useHuijiNo.Text = "否";
+            this.useHuijiNo.UseVisualStyleBackColor = true;
+            this.useHuijiNo.CheckedChanged += new System.EventHandler(this.useHuijiNo_CheckedChanged);
+            // 
             // useHuijiYse
             // 
             this.useHuijiYse.AutoSize = true;
@@ -80,17 +92,6 @@
             this.useHuijiYse.Text = "是";
             this.useHuijiYse.UseVisualStyleBackColor = true;
             this.useHuijiYse.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
-            // 
-            // useHuijiNo
-            // 
-            this.useHuijiNo.AutoSize = true;
-            this.useHuijiNo.Location = new System.Drawing.Point(145, 20);
-            this.useHuijiNo.Name = "useHuijiNo";
-            this.useHuijiNo.Size = new System.Drawing.Size(35, 16);
-            this.useHuijiNo.TabIndex = 2;
-            this.useHuijiNo.Text = "否";
-            this.useHuijiNo.UseVisualStyleBackColor = true;
-            this.useHuijiNo.CheckedChanged += new System.EventHandler(this.useHuijiNo_CheckedChanged);
             // 
             // groupBox2
             // 
@@ -207,6 +208,7 @@
             // 
             // groupBox5
             // 
+            this.groupBox5.Controls.Add(this.biggerFontSize);
             this.groupBox5.Controls.Add(this.halfFontSize);
             this.groupBox5.Controls.Add(this.fullFontSize);
             this.groupBox5.Location = new System.Drawing.Point(289, 156);
@@ -219,7 +221,7 @@
             // halfFontSize
             // 
             this.halfFontSize.AutoSize = true;
-            this.halfFontSize.Location = new System.Drawing.Point(145, 20);
+            this.halfFontSize.Location = new System.Drawing.Point(206, 20);
             this.halfFontSize.Name = "halfFontSize";
             this.halfFontSize.Size = new System.Drawing.Size(59, 16);
             this.halfFontSize.TabIndex = 2;
@@ -230,11 +232,10 @@
             // 
             this.fullFontSize.AutoSize = true;
             this.fullFontSize.Checked = true;
-            this.fullFontSize.Location = new System.Drawing.Point(18, 20);
+            this.fullFontSize.Location = new System.Drawing.Point(121, 20);
             this.fullFontSize.Name = "fullFontSize";
             this.fullFontSize.Size = new System.Drawing.Size(59, 16);
             this.fullFontSize.TabIndex = 1;
-            this.fullFontSize.TabStop = true;
             this.fullFontSize.Text = "全尺寸";
             this.fullFontSize.UseVisualStyleBackColor = true;
             this.fullFontSize.CheckedChanged += new System.EventHandler(this.fullFontSize_CheckedChanged);
@@ -293,6 +294,16 @@
             this.dxFont.Text = "等线";
             this.dxFont.UseVisualStyleBackColor = true;
             // 
+            // biggerFontSize
+            // 
+            this.biggerFontSize.AutoSize = true;
+            this.biggerFontSize.Location = new System.Drawing.Point(29, 20);
+            this.biggerFontSize.Name = "biggerFontSize";
+            this.biggerFontSize.Size = new System.Drawing.Size(71, 16);
+            this.biggerFontSize.TabIndex = 3;
+            this.biggerFontSize.Text = "更大尺寸";
+            this.biggerFontSize.UseVisualStyleBackColor = true;
+            // 
             // ConfigForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -350,5 +361,6 @@
         private System.Windows.Forms.GroupBox groupBox6;
         private System.Windows.Forms.RadioButton defaultFont;
         private System.Windows.Forms.RadioButton dxFont;
+        private System.Windows.Forms.RadioButton biggerFontSize;
     }
 }
