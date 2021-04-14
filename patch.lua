@@ -14,6 +14,7 @@ WikiDic.cursur_sprite = nil
 WikiDic.iconScale = Vector(1,1)
 WikiDic.fontScale = 1
 WikiDic.distYMulti = 1
+WikiDic.taintIsaacOffset = Vector(0,25)
 WikiDic.authRemains = 60*9
 WikiDic.authTexts = {}
 
@@ -51,6 +52,7 @@ if WikiDic.useHalfSizeFont then
 	WikiDic.trinketIconOffset = Vector(-8,6)
 	WikiDic.iconScale = Vector(0.5,0.5)
 	WikiDic.fontScale = 0.5
+	WikiDic.taintIsaacOffset = Vector(3,27)
 end
 if WikiDic.useBiggerSizeFont then
 	WikiDic.renderPos = Vector(80,45)
@@ -59,6 +61,7 @@ if WikiDic.useBiggerSizeFont then
 	WikiDic.trinketIconOffset = Vector(-10,12)
 	WikiDic.iconScale = Vector(1.2,1.2)
 	WikiDic.fontScale = 1.2
+	WikiDic.taintIsaacOffset = Vector(0,25)
 end
 if WikiDic.useHuijiWiki then
 	for _,text in pairs(WikiDic.huijiWikiInfo) do
@@ -196,7 +199,6 @@ function WikiDic:RenderCallback()
 	end
 
 	if WikiDic.targetEntity ~= nil then
-		local rpos = Isaac.WorldToRenderPosition(WikiDic.targetEntity.Position + WikiDic.renderOffset)
 		local desc = nil
 		if WikiDic.targetEntity.Variant == 100 then
 			desc = WikiDic.desc[WikiDic.targetEntity.SubType] or (WikiDic.targetEntity.SubType .. "号道具\n\n没有收录")
@@ -207,6 +209,11 @@ function WikiDic:RenderCallback()
 
 		local last = 0
 		local next_line = WikiDic.renderPos --Vector(rpos.X,rpos.Y)
+
+		-- taint isaac is 21
+		if Isaac.GetPlayer(0).SubType == 21 then
+			next_line = next_line + WikiDic.taintIsaacOffset
+		end
 
 		if WikiDic.targetEntity.Variant == 100 then
 			--WikiDic.targetEntity:GetSprite():Render(next_line,WikiDic.nullVector,WikiDic.nullVector)
