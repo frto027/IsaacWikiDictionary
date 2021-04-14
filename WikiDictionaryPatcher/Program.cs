@@ -524,6 +524,8 @@ namespace WikiDictionaryPatcher
                         if (line == FAKE_DESC_CONTENT)
                             patch += item_desc + "\n";
                         else if (line == FAKE_CONFIG_SEG_1) {
+                            patch += "WikiDic.useHuijiWiki = " + (dicOptions.getHuijiWikiDesc ? "true" : "false") + "\n";
+                            patch += "WikiDic.useFandomWiki = " + (dicOptions.useFandomWikiDesc ? "true" : "false") + "\n";
                             patch += "WikiDic.usePlayerPos = " + (dicOptions.use_player_pos ? "true" : "false") + "\n";
                             patch += "WikiDic.drawMouse = " + (dicOptions.draw_mouse ? "true" : "false") + "\n";
                             patch += "WikiDic.useDefaultFont = " + (dicOptions.use_default_font ? "true" : "false") + "\n";
