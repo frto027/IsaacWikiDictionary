@@ -199,7 +199,7 @@ namespace WikiDictionaryPatcher
         private static LinkedList<ItemDesc> GetFandomWikiItemDesc()
         {
             Console.WriteLine("正在下载fandom wiki中的道具信息...");
-            WebRequest request = HttpWebRequest.Create("https://bindingofisaacrebirth.fandom.com/wiki/Items");
+            WebRequest request = HttpWebRequest.Create("http://frto027.gitee.io/wiki-buffer/fandom-item.html");
             string webPage = new StreamReader(request.GetResponse().GetResponseStream()).ReadToEnd();
 
             var html = new HtmlAgilityPack.HtmlDocument();
@@ -252,7 +252,7 @@ namespace WikiDictionaryPatcher
         private static LinkedList<ItemDesc> GetFandomWikiTrinketDesc()
         {
             Console.WriteLine("正在下载fandom wiki中的饰品信息...");
-            WebRequest request = HttpWebRequest.Create("https://bindingofisaacrebirth.fandom.com/wiki/Trinkets");
+            WebRequest request = HttpWebRequest.Create("http://frto027.gitee.io/wiki-buffer/fandom-trinket.html");
             string webPage = new StreamReader(request.GetResponse().GetResponseStream()).ReadToEnd();
 
             var html = new HtmlAgilityPack.HtmlDocument();
@@ -306,7 +306,7 @@ namespace WikiDictionaryPatcher
         {
             var ret = new LinkedList<ItemDesc>();
             Console.WriteLine("正在下载灰机wiki中的道具信息...");
-            WebRequest request = HttpWebRequest.Create("https://isaac.huijiwiki.com/wiki/%E9%81%93%E5%85%B7");
+            WebRequest request = HttpWebRequest.Create("http://frto027.gitee.io/wiki-buffer/huiji-item.html");
             string webPage = new StreamReader(request.GetResponse().GetResponseStream()).ReadToEnd();
 
             var html = new HtmlAgilityPack.HtmlDocument();
@@ -365,7 +365,7 @@ namespace WikiDictionaryPatcher
         {
             var ret = new LinkedList<ItemDesc>();
             Console.WriteLine("正在下载灰机wiki中的饰品信息...");
-            WebRequest request = HttpWebRequest.Create("https://isaac.huijiwiki.com/wiki/%E9%A5%B0%E5%93%81");
+            WebRequest request = HttpWebRequest.Create("http://frto027.gitee.io/wiki-buffer/huiji-trinket.html");
             string webPage = new StreamReader(request.GetResponse().GetResponseStream()).ReadToEnd();
 
             var html = new HtmlAgilityPack.HtmlDocument();
