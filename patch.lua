@@ -237,6 +237,7 @@ function WikiDic:RenderCallback()
 end
 
 function WikiDic:RenderAuthorityCallback()
+	WikiDic:InitFonts()
 	if WikiDic.authRemains > 0 then
 		WikiDic.authRemains = WikiDic.authRemains - 1
 	end
