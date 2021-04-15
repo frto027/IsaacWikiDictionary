@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -42,11 +43,23 @@ namespace WikiDictionaryPatcher
             RES_MAIN_LUA_PATCH = @"patch.lua",
             RES_FONT_FOLDER_PATCH = "wd_font";
 #endif
+        private static int VERSION = 1;
+        private static string USER_AGENT = string.Format("IsaacWikiDicInstaller/{0} (https://gitee.com/frto027/isaac-wiki-dictionary; huiji_wiki_user:Frto027; 602706150@qq.com) .NetFramework/4.7.2", VERSION);
+
+
+        private static string VersionUrl = "https://frto027.gitee.io/wiki-buffer/version.json";
+        private static VersionInfo version = null;
+
         [STAThread]
         static void Main(string[] args)
         {
+
+            
             MessageBox.Show("版权声明：此图鉴程序著作权归属@frto027(bilibili/github/gitee：frto027、贴吧id：frt-027)所有，且保留追究责任的权利，任何形式的转载需注明出处。\n图鉴中展示的物品条例版权归原作者所有。");
             MessageBox.Show("此版本图鉴数据来源(致谢)：\n灰机wiki(https://isaac.huijiwiki.com/)\nBinding of Isaac: Rebirth Wiki is a Fandom Gaming Community(https://bindingofisaacrebirth.fandom.com/)");
+
+            
+
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Filter = "以撒主程序(isaac-ng.exe)|";
             dialog.Title = "请选择以撒的主程序isaac-ng.exe(支持的游戏版本：胎衣+或忏悔)";
@@ -89,25 +102,42 @@ namespace WikiDictionaryPatcher
                     return;
                 }
             }
+
+            Console.WriteLine("正在下载元数据...");
+
+            HttpWebRequest request = HttpWebRequest.CreateHttp(VersionUrl);
+            request.UserAgent = USER_AGENT;
+            using (var stream = request.GetResponse().GetResponseStream())
+            {
+                using (var reader = new StreamReader(stream))
+                {
+                    try
+                    {
+                        version = Newtonsoft.Json.JsonConvert.DeserializeObject<VersionInfo>(reader.ReadToEnd());
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                }
+            }
+            if (version == null)
+            {
+                MessageBox.Show("元数据下载失败，请检查网络或更新版本。");
+                return;
+            }
+            if (VERSION < version.invalid_last)
+            {
+                MessageBox.Show("当前版本过旧，已无法使用。请重新到软件发布页面下载新版本。");
+                return;
+            }
+
             DicOptions options = new DicOptions() { canceled = false };
 
             new ConfigForm(options).ShowDialog();
 
             if (options.canceled)
                 return;
-            /*
-            if (MessageBox.Show("是否下载wiki信息并添加游戏图鉴？","询问",MessageBoxButtons.YesNo) == DialogResult.No)
-            {
-                return;
-            }
-
-            bool getHuijiWikiDesc = MessageBox.Show("是否下载灰机wiki信息？（点否将下载英文维基fandomWiki上的内容）", "询问", MessageBoxButtons.YesNo) == DialogResult.Yes;
-            bool useFandomWiki = true;
-            if (getHuijiWikiDesc)
-            {
-                useFandomWiki = MessageBox.Show("是否下载英文维基fandomWiki上的内容，作为补充内容？", "询问", MessageBoxButtons.YesNo) == DialogResult.Yes;
-            }
-            */
 
             bool getHuijiWikiDesc = options.getHuijiWikiDesc;
             bool useFandomWiki = options.useFandomWikiDesc;
@@ -172,252 +202,222 @@ namespace WikiDictionaryPatcher
                 d = d.Replace("\\", "\\\\").Replace("\n", "\\n").Replace("\"", "\\\"");
                 trinket_desc += string.Format("[{0}]=\"{1}\",\n", item.Value.id, d);
             }
-            //=======trinket
-
-            /*
-            bool use_player_pos =
-                MessageBox.Show("点击“是”显示玩家最近的道具，点击“否”使用鼠标拾取道具。", "道具选择方式？", MessageBoxButtons.YesNo) == DialogResult.Yes;
-            bool mouse_cursor = false;
-            if (!use_player_pos)
-            {
-                mouse_cursor = MessageBox.Show("是否要在屏幕上显示一个鼠标指针，以方便全屏时观察鼠标位置？", "询问", MessageBoxButtons.YesNo) == DialogResult.Yes;
-            }
-            bool use_default_font = false;
-            if(!getHuijiWikiDesc && useFandomWiki)
-            {
-                use_default_font = MessageBox.Show("您选择了只使用英文维基，是否要使用游戏默认的英文字体呢？如果点击是，则使用游戏的默认字体，点击否，则使用图鉴程序自带的等线中文字体。","字体询问",MessageBoxButtons.YesNo) == DialogResult.Yes;
-            }
-
-            bool use_half_size_font = MessageBox.Show("是否使用全尺寸字体？点否将使得图鉴信息变为一半大小进行显示(半尺寸大小显示时，请关闭游戏的FILTER/滤光器选项，以免字体被平滑，影响辨识度)。", "尺寸询问？", MessageBoxButtons.YesNo) == DialogResult.No;
-            */
-
 
             AddPatch(lua_path, desc_dict, trinket_desc, options);
             MessageBox.Show("操作完成");
         }
 
+        private static void DownloadItemDesc(string url,Action beginCallback,Action<int,HtmlNode> onTd, Action<int,string>onText ,Action endCallback)
+        {
+            HttpWebRequest request = HttpWebRequest.CreateHttp(url);
+            request.UserAgent = USER_AGENT;
+            string r = null;
+            using(var s = request.GetResponse().GetResponseStream())
+            {
+                using(var sr = new StreamReader(s))
+                {
+                    try
+                    {
+                        r = sr.ReadToEnd();
+                    }catch(Exception e)
+                    {
+                        Console.WriteLine(e);
+                        MessageBox.Show("网络请求异常");
+                        return;
+                    }
+                }
+            }
+            ExpandTemplateResult template = Newtonsoft.Json.JsonConvert.DeserializeObject<ExpandTemplateResult>(r);
+            string wikitext = template.expandtemplates.wikitext;
+
+
+            var html = new HtmlAgilityPack.HtmlDocument();
+            html.LoadHtml(wikitext);
+
+            var table = Dfs(html.DocumentNode,n=>n.Name == "table");
+            if(table != null)
+            {
+                foreach (HtmlNode tr in table.ChildNodes)
+                {
+                    if (tr.Name != "tr")
+                        continue;
+                    //skip table head
+                    if (Dfs(tr, d => d.Name == "th") != null)
+                        continue;
+
+                    int td_i = 0;
+                    beginCallback();
+                    foreach (HtmlNode td in tr.ChildNodes)
+                    {
+                        if (td.Name != "td")
+                            continue;
+                        onTd(td_i, td);
+                        td_i++;
+                    }
+                    endCallback();
+                }
+                return;
+            }
+
+
+            //parse as another way
+
+            var splited = wikitext.Split('\n');// Regex.Replace(wikitext, @"\[\[(.*?)(\|.*?)?\]\]", (e) => e.Groups[1].Value).Split('|');
+            int index = -1;
+            foreach(var str in splited)
+            {
+                if (str.StartsWith("|- "))
+                {
+                    beginCallback();
+                    index = 0;
+                }else if (str.StartsWith("|-"))
+                {
+                    if(index != 5 && index != 6)
+                    {
+                        MessageBox.Show("表格解析错误，请更新版本。");
+                        return;
+                    }
+                    endCallback();
+                    index = 0;
+                }
+                else if(str.StartsWith("| "))
+                {
+                    onText(index, str.Substring(2));
+                    index++;
+                }
+            }
+        }
+
         private static LinkedList<ItemDesc> GetFandomWikiItemDesc()
         {
-            Console.WriteLine("正在下载fandom wiki中的道具信息...");
-            WebRequest request = HttpWebRequest.Create("http://frto027.gitee.io/wiki-buffer/fandom-item.html");
-            string webPage = new StreamReader(request.GetResponse().GetResponseStream()).ReadToEnd();
-
-            var html = new HtmlAgilityPack.HtmlDocument();
-            html.LoadHtml(webPage);
-
-            var tables = new LinkedList<HtmlNode>();
-
-            Dfs(html.DocumentNode, d =>
-            {
-                if (d.Name == "table" && d.InnerText.Substring(0, 20).Contains("Name"))
-                    tables.AddLast(d);
-                return false;
-            });
             var ret = new LinkedList<ItemDesc>();
-            foreach(var table in tables)
-            {
-                foreach (HtmlNode tr in Dfs(table,n=>n.Name == "tbody")?.ChildNodes)
+            Console.WriteLine("正在下载fandom wiki中的道具信息...");
+
+            ItemDesc current = null;
+            //翻译wikitext好累啊
+            DownloadItemDesc(version.fandomItemUrl, () => { current = new ItemDesc(); },(a,b)=> { }, (id, node) => {
+                if (id == 0)
                 {
-                    if (tr.Name != "tr")
-                        continue;
-                    //skip table head
-                    if (Dfs(tr, d => d.Name == "th") != null)
-                        continue;
-
-                    string item_name = "未知";
-                    string item_desc = "未知";
-                    int item_id = -1;
-
-                    int td_i = 0;
-                    foreach (HtmlNode td in tr.ChildNodes)
-                    {
-                        if (td.Name != "td")
-                            continue;
-                        if (td_i == 0)
-                            item_name = td.InnerText.Replace("\n"," ");
-                        if (td_i == 1)
-                            item_id = int.Parse(td.InnerText.Replace("\n","").Substring("5.100.".Length));
-                        if (td_i == 4)
-                            item_desc = td.InnerText.Replace("&#160;", "");
-                        td_i++;
-                    }
-
-                    ret.AddLast(new ItemDesc() { id = item_id, name = item_name, desc = item_desc });
-                    //Console.WriteLine(item_id + "\t" + item_name + "\t" + item_desc);
-                    Console.WriteLine(string.Format("[{0}] = \"{1}\",", item_id, item_name + "\\n" + item_desc.Replace("\n", "\\n")));
+                    string rm_str = node;
+                    rm_str = Regex.Replace(rm_str, @"\[\[file:.*?\]\]", (e) => "");
+                    rm_str = Regex.Replace(rm_str, @"\[\[category:.*?\]\]", (e) => "");
+                    rm_str = Regex.Replace(rm_str, @"\<span.*?\>", (e) => "");
+                    rm_str = Regex.Replace(rm_str, @"\</span\>", (e) => "");
+                    rm_str = rm_str.Replace("<br>", "\n");
+                    current.name = Regex.Replace(rm_str, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value).Trim();
                 }
-            }
+                if (id == 1)
+                {
+                    current.id = int.Parse(node.Substring(node.IndexOf("</span>") + 7));
+                }
+                if (id == 4)
+                {
+                    string rm_str = node;
+                    rm_str = Regex.Replace(rm_str, @"\[\[file:.*?\]\]", (e) => "");
+                    rm_str = Regex.Replace(rm_str, @"\[\[category:.*?\]\]", (e) => "");
+                    rm_str = Regex.Replace(rm_str, @"\<span.*?\>", (e) => "");
+                    rm_str = Regex.Replace(rm_str, @"\</span\>", (e) => "");
+                    rm_str = rm_str.Replace("<br>", "\n");
+                    current.desc = Regex.Replace(rm_str, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value);
+                }
+            }, () => {
+                ret.AddLast(current);
+            });
+
             return ret;
         }
+
         private static LinkedList<ItemDesc> GetFandomWikiTrinketDesc()
         {
-            Console.WriteLine("正在下载fandom wiki中的饰品信息...");
-            WebRequest request = HttpWebRequest.Create("http://frto027.gitee.io/wiki-buffer/fandom-trinket.html");
-            string webPage = new StreamReader(request.GetResponse().GetResponseStream()).ReadToEnd();
-
-            var html = new HtmlAgilityPack.HtmlDocument();
-            html.LoadHtml(webPage);
-
-            var tables = new LinkedList<HtmlNode>();
-
-            Dfs(html.DocumentNode, d =>
-            {
-                if (d.Name == "table" && d.InnerText.Substring(0, 20).Contains("Name"))
-                    tables.AddLast(d);
-                return false;
-            });
             var ret = new LinkedList<ItemDesc>();
-            foreach (var table in tables)
-            {
-                foreach (HtmlNode tr in Dfs(table, n => n.Name == "tbody")?.ChildNodes)
+            Console.WriteLine("正在下载fandom wiki中的饰品信息...");
+
+            ItemDesc current = null;
+
+            DownloadItemDesc(version.fandomTrinketUrl, () => { current = new ItemDesc(); }, (a, b) => { }, (id, node) => {
+                if (id == 0)
                 {
-                    if (tr.Name != "tr")
-                        continue;
-                    //skip table head
-                    if (Dfs(tr, d => d.Name == "th") != null)
-                        continue;
-
-                    string item_name = "未知";
-                    string item_desc = "未知";
-                    int item_id = -1;
-
-                    int td_i = 0;
-                    foreach (HtmlNode td in tr.ChildNodes)
-                    {
-                        if (td.Name != "td")
-                            continue;
-                        if (td_i == 0)
-                            item_name = td.InnerText.Replace("\n", " ");
-                        if (td_i == 1)
-                            item_id = int.Parse(td.InnerText.Replace("\n", "").Substring("5.350.".Length));
-                        if (td_i == 4)
-                            item_desc = td.InnerText.Replace("&#160;", "");
-                        td_i++;
-                    }
-
-                    ret.AddLast(new ItemDesc() { id = item_id, name = item_name, desc = item_desc });
-                    //Console.WriteLine(item_id + "\t" + item_name + "\t" + item_desc);
-                    Console.WriteLine(string.Format("[{0}] = \"{1}\",", item_id, item_name + "\\n" + item_desc.Replace("\n", "\\n")));
+                    string rm_str = node;
+                    rm_str = Regex.Replace(rm_str, @"\[\[file:.*?\]\]", (e) => "");
+                    rm_str = Regex.Replace(rm_str, @"\[\[category:.*?\]\]", (e) => "");
+                    rm_str = Regex.Replace(rm_str, @"\<span.*?\>", (e) => "");
+                    rm_str = Regex.Replace(rm_str, @"\</span\>", (e) => "");
+                    rm_str = rm_str.Replace("<br>", "\n");
+                    current.name = Regex.Replace(rm_str, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value).Trim();
                 }
-            }
+                if (id == 1)
+                {
+                    current.id = int.Parse(node.Substring(node.IndexOf("</span>") + 7));
+                }
+                if (id == 4)
+                {
+                    string rm_str = node;
+                    rm_str = Regex.Replace(rm_str, @"\[\[file:.*?\]\]", (e) => "");
+                    rm_str = Regex.Replace(rm_str, @"\[\[category:.*?\]\]", (e) => "");
+                    rm_str = Regex.Replace(rm_str, @"\<span.*?\>", (e) => "");
+                    rm_str = Regex.Replace(rm_str, @"\</span\>", (e) => "");
+                    rm_str = rm_str.Replace("<br>", "\n");
+                    current.desc = Regex.Replace(rm_str, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value);
+                }
+            }, () => {
+                ret.AddLast(current);
+            });
+
             return ret;
         }
         public static LinkedList<ItemDesc> GetHuijiWikiItemDesc()
         {
             var ret = new LinkedList<ItemDesc>();
             Console.WriteLine("正在下载灰机wiki中的道具信息...");
-            WebRequest request = HttpWebRequest.Create("http://frto027.gitee.io/wiki-buffer/huiji-item.html");
-            string webPage = new StreamReader(request.GetResponse().GetResponseStream()).ReadToEnd();
 
-            var html = new HtmlAgilityPack.HtmlDocument();
-            html.LoadHtml(webPage);
-
-            var table = Dfs(html.DocumentNode, d => d.Name == "table" && d.InnerText.StartsWith("名称"));
-            if (table == null)
-            {
-                MessageBox.Show("没有在灰机wiki道具页上发现饰品表格，这意味着此工具和wiki不匹配。当前版本的工具已经无法使用。");
-                return null;
-            }
-
-            foreach (HtmlNode tr in table.ChildNodes)
-            {
-                if (tr.Name != "tr")
-                    continue;
-                //skip table head
-                if (Dfs(tr, d => d.Name == "th") != null)
-                    continue;
-
-                string item_name = "未知";
-                string item_desc = "未知";
-                int item_id = -1;
-
-                int td_i = 0;
-                foreach (HtmlNode td in tr.ChildNodes)
+            ItemDesc current = null;
+            //教科书般的lambda表达式
+            DownloadItemDesc(version.huijiItemUrl,()=> { current = new ItemDesc(); }, (id, node) => {
+                if(id == 0)
                 {
-                    if (td.Name != "td")
-                        continue;
-                    if (td_i == 0)
-                    {
-                        string chinese = null;
-                        foreach (var item in td.ChildNodes)
-                        {
-                            if (chinese != null)
-                                chinese += item.InnerText;
-                            else if (item.Name == "br")
-                                chinese = "";
-                        }
-                        item_name = chinese;
-                    }
-                    if (td_i == 2)
-                        item_id = int.Parse(td.InnerText);
-                    if (td_i == 5)
-                        item_desc = td.InnerText.Replace("&#160;", "");
-                    td_i++;
+                    current.name = Regex.Replace(node.LastChild.InnerText, @"\[\[(.*?)(\|.*?)?\]\]", (e) => e.Groups[1].Value);
                 }
+                if(id == 2)
+                {
+                    current.id = int.Parse(node.InnerText);
+                }
+                if(id == 5)
+                {
+                    string s_remove_file = Regex.Replace(node.InnerText, @"\[\[文件(.*?)(\|.*?)?\]\]", (e) => "").Replace("&nbsp;","");
+                    current.desc = Regex.Replace(s_remove_file, @"\[\[(.*?)(\|.*?)?\]\]", (e) => e.Groups[1].Value);
+                }
+            },(a, b) => { },() => {
+                ret.AddLast(current);
+            });
 
-                ret.AddLast(new ItemDesc() { id = item_id, name = item_name, desc = item_desc });
-                //Console.WriteLine(item_id + "\t" + item_name + "\t" + item_desc);
-                Console.WriteLine(string.Format("[{0}] = \"{1}\",", item_id, item_name + "\\n" + item_desc.Replace("\n", "\\n")));
-            }
             return ret;
         }
+
         public static LinkedList<ItemDesc> GetHuijiWikiTrinketDesc()
         {
             var ret = new LinkedList<ItemDesc>();
             Console.WriteLine("正在下载灰机wiki中的饰品信息...");
-            WebRequest request = HttpWebRequest.Create("http://frto027.gitee.io/wiki-buffer/huiji-trinket.html");
-            string webPage = new StreamReader(request.GetResponse().GetResponseStream()).ReadToEnd();
 
-            var html = new HtmlAgilityPack.HtmlDocument();
-            html.LoadHtml(webPage);
-
-            var table = Dfs(html.DocumentNode, d => d.Name == "table" && d.InnerText.StartsWith("名称"));
-            if (table == null)
-            {
-                MessageBox.Show("没有在灰机wiki道具页上发现道具表格，这意味着此工具和wiki不匹配。当前版本的工具已经无法使用。");
-                return null;
-            }
-
-            foreach (HtmlNode tr in table.ChildNodes)
-            {
-                if (tr.Name != "tr")
-                    continue;
-                //skip table head
-                if (Dfs(tr, d => d.Name == "th") != null)
-                    continue;
-
-                string item_name = "未知";
-                string item_desc = "未知";
-                int item_id = -1;
-
-                int td_i = 0;
-                foreach (HtmlNode td in tr.ChildNodes)
+            ItemDesc current = null;
+            //教科书般的lambda表达式
+            DownloadItemDesc(version.huijiTrinketUrl, () => { current = new ItemDesc(); }, (id, node) => {
+                if (id == 0)
                 {
-                    if (td.Name != "td")
-                        continue;
-                    if (td_i == 0)
-                    {
-                        string chinese = null;
-                        foreach (var item in td.ChildNodes)
-                        {
-                            if (chinese != null)
-                                chinese += item.InnerText;
-                            else if (item.Name == "br")
-                                chinese = "";
-                        }
-                        item_name = chinese;
-                    }
-                    if (td_i == 2)
-                        item_id = int.Parse(td.InnerText);
-                    if (td_i == 5)
-                        item_desc = td.InnerText.Replace("&#160;", "");
-                    td_i++;
+                    current.name = Regex.Replace(node.LastChild.InnerText, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value);
                 }
+                if (id == 2)
+                {
+                    current.id = int.Parse(node.InnerText);
+                }
+                if (id == 5)
+                {
+                    string s_remove_file = Regex.Replace(node.InnerText, @"\[\[文件(.*?)(\|.*?)?\]\]", (e) => "").Replace("&nbsp;", "");
+                    current.desc = Regex.Replace(s_remove_file, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value);
+                }
+            }, (a, b) => { }, () => {
+                ret.AddLast(current);
+            });
 
-                ret.AddLast(new ItemDesc() { id = item_id, name = item_name, desc = item_desc });
-                //Console.WriteLine(item_id + "\t" + item_name + "\t" + item_desc);
-                Console.WriteLine(string.Format("[{0}] = \"{1}\",", item_id, item_name + "\\n" + item_desc.Replace("\n", "\\n")));
-            }
             return ret;
         }
         private static HtmlNode Dfs(HtmlNode node, Func<HtmlNode, bool> f)
