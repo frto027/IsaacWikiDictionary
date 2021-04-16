@@ -10,7 +10,7 @@ namespace WikiDictionaryPatcher
     {
         public int invalid_last;
         public string
-            huijiItemUrl, huijiTrinketUrl, fandomItemUrl, fandomTrinketUrl;
+            huijiItemUrl, huijiTrinketUrl,huijiCardUrl, fandomItemUrl, fandomTrinketUrl;
     }
 
     public class ExpandTemplateResult

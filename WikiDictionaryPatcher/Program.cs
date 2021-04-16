@@ -32,6 +32,7 @@ namespace WikiDictionaryPatcher
             FAKE_LINE_BEGIN = "-- WikiDict MARK START --",
             FAKE_DESC_CONTENT = "-- FAKE_DESC_CONTENT --",
             FAKE_TRINKET_DESC_CONTENT = "-- FAKE_TRINKET_CONTENT --",
+            FAKE_CARD_DESC_CONTENT = "-- FAKE_CARD_CONTENT --",
             FAKE_CONFIG_SEG_1 = "-- FAKE_CONFIG_SEG_1 --",
             FAKE_LINE_END = "-- WikiDict MARK END --";
 #if DEBUG
@@ -54,7 +55,6 @@ namespace WikiDictionaryPatcher
         static void Main(string[] args)
         {
 
-            
             MessageBox.Show("版权声明：此图鉴程序著作权归属@frto027(bilibili/github/gitee：frto027、贴吧id：frt-027)所有，且保留追究责任的权利，任何形式的转载需注明出处。\n图鉴中展示的物品条例版权归原作者所有。");
             MessageBox.Show("此版本图鉴数据来源(致谢)：\n灰机wiki(https://isaac.huijiwiki.com/)\nBinding of Isaac: Rebirth Wiki is a Fandom Gaming Community(https://bindingofisaacrebirth.fandom.com/)");
 
@@ -145,11 +145,12 @@ namespace WikiDictionaryPatcher
 
             Dictionary<int, ItemDesc> descs = new Dictionary<int, ItemDesc>();
             Dictionary<int, ItemDesc> trinket_descs = new Dictionary<int, ItemDesc>();
+            Dictionary<int, ItemDesc> card_descs = new Dictionary<int, ItemDesc>();
             if (getHuijiWikiDesc)
             {
                 LinkedList<ItemDesc> huijiItemDesc = GetHuijiWikiItemDesc();
                 LinkedList<ItemDesc> huijiTrinketDesc = GetHuijiWikiTrinketDesc();
-
+                LinkedList<ItemDesc> huijiCardDesc = GetHuijiWikiCardDesc();
                 foreach(var item in huijiItemDesc)
                 {
                     descs.Add(item.id, item);
@@ -157,6 +158,10 @@ namespace WikiDictionaryPatcher
                 foreach (var item in huijiTrinketDesc)
                 {
                     trinket_descs.Add(item.id, item);
+                }
+                foreach(var item in huijiCardDesc)
+                {
+                    card_descs.Add(item.id, item);
                 }
             }
 
@@ -202,8 +207,14 @@ namespace WikiDictionaryPatcher
                 d = d.Replace("\\", "\\\\").Replace("\n", "\\n").Replace("\"", "\\\"");
                 trinket_desc += string.Format("[{0}]=\"{1}\",\n", item.Value.id, d);
             }
-
-            AddPatch(lua_path, desc_dict, trinket_desc, options);
+            string card_desc = "";
+            foreach (var item in card_descs)
+            {
+                string d = item.Value.name + "\n" + item.Value.desc;
+                d = d.Replace("\\", "\\\\").Replace("\n", "\\n").Replace("\"", "\\\"");
+                card_desc += string.Format("[{0}]=\"{1}\",\n", item.Value.id, d);
+            }
+            AddPatch(lua_path, desc_dict, trinket_desc,card_desc, options);
             MessageBox.Show("操作完成");
         }
 
@@ -365,6 +376,7 @@ namespace WikiDictionaryPatcher
 
             return ret;
         }
+
         public static LinkedList<ItemDesc> GetHuijiWikiItemDesc()
         {
             var ret = new LinkedList<ItemDesc>();
@@ -420,6 +432,34 @@ namespace WikiDictionaryPatcher
 
             return ret;
         }
+        public static LinkedList<ItemDesc> GetHuijiWikiCardDesc()
+        {
+            var ret = new LinkedList<ItemDesc>();
+            Console.WriteLine("正在下载灰机wiki中的卡牌信息...");
+
+            ItemDesc current = null;
+            //教科书般的lambda表达式
+            DownloadItemDesc(version.huijiCardUrl, () => { current = new ItemDesc(); }, (id, node) => {
+                if (id == 0)
+                {
+                    current.name = Regex.Replace(node.LastChild.InnerText, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value);
+                }
+                if (id == 2)
+                {
+                    current.id = int.Parse(node.InnerText);
+                }
+                if (id == 5)
+                {
+                    string s_remove_file = Regex.Replace(node.InnerText, @"\[\[文件(.*?)(\|.*?)?\]\]", (e) => "").Replace("&nbsp;", "");
+                    current.desc = Regex.Replace(s_remove_file, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value);
+                }
+            }, (a, b) => { }, () => {
+                ret.AddLast(current);
+            });
+
+            return ret;
+        }
+
         private static HtmlNode Dfs(HtmlNode node, Func<HtmlNode, bool> f)
         {
             if (f(node))
@@ -485,7 +525,7 @@ namespace WikiDictionaryPatcher
             catch (IOException) { }
         }
 
-        private static void AddPatch(string luaName, string item_desc, string trinket_desc, DicOptions dicOptions)
+        private static void AddPatch(string luaName, string item_desc, string trinket_desc,string card_desc, DicOptions dicOptions)
         {
             string next = "";
             bool isPatching = false;
@@ -535,6 +575,9 @@ namespace WikiDictionaryPatcher
                         else if(line == FAKE_TRINKET_DESC_CONTENT)
                         {
                             patch += trinket_desc + "\n";
+                        }else if(line == FAKE_CARD_DESC_CONTENT)
+                        {
+                            patch += card_desc + "\n";
                         }else
                             patch += line + "\n";
                     }

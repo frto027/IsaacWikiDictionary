@@ -19,6 +19,7 @@ WikiDic.authRemains = 60*9
 WikiDic.authTexts = {}
 
 WikiDic.huijiWikiInfo = {
+	"提示：按住Tab键显示手上持有的卡牌信息",
 	"中文图鉴信息来源：灰机wiki",
 	"https://isaac.huijiwiki.com/wiki",
 }
@@ -83,6 +84,10 @@ WikiDic.desc = {
 
 WikiDic.trinketDesc = {
 -- FAKE_TRINKET_CONTENT --
+}
+
+WikiDic.cardDesc = {
+-- FAKE_CARD_CONTENT --
 }
 
 function WikiDic:Update()
@@ -182,15 +187,18 @@ function WikiDic:InitFonts()
 		WikiDic.font:Load(WikiDic.useDefaultFont and "font/terminus.fnt" or "wd_font/dx_wdic.fnt")
 		WikiDic:FixReturn(WikiDic.desc)
 		WikiDic:FixReturn(WikiDic.trinketDesc)
+		WikiDic:FixReturn(WikiDic.cardDesc)
 	end
 end
 
 function WikiDic:RenderCallback()
 	WikiDic:InitFonts()
 
+	local card_hold = WikiDic.useHuijiWiki and Input.IsActionPressed(ButtonAction.ACTION_MAP,0) and Isaac.GetPlayer(0):GetCard(0) or 0
+
 	-- draw auth infos here
 	if WikiDic.authRemains > 0 then
-		if WikiDic.targetEntity ~= nil then
+		if WikiDic.targetEntity ~= nil or card_hold ~= 0 then
 			WikiDic.authRemains = 0
 		end
 
@@ -221,41 +229,44 @@ function WikiDic:RenderCallback()
 		WikiDic.cursur_sprite:Render(mousePos,WikiDic.nullVector,WikiDic.nullVector)
 	end
 
-	if WikiDic.targetEntity ~= nil then
+	if WikiDic.targetEntity ~= nil or card_hold ~= 0 then
 		local desc = nil
-		if WikiDic.targetEntity.Variant == 100 then
-			desc = WikiDic.desc[WikiDic.targetEntity.SubType] or (WikiDic.targetEntity.SubType .. "号道具\n\n没有收录")
-		end
-		if WikiDic.targetEntity.Variant == 350 then
-			desc = WikiDic.trinketDesc[WikiDic.targetEntity.SubType] or (WikiDic.targetEntity.SubType .. "号饰品\n\n没有收录")
-		end
-
 		local last = 0
 		local next_line = WikiDic.renderPos --Vector(rpos.X,rpos.Y)
-
 		-- taint isaac is 21
 		if Isaac.GetPlayer(0).SubType == 21 then
 			next_line = next_line + WikiDic.taintIsaacOffset
 		end
 
-		if WikiDic.targetEntity.Variant == 100 then
-			--WikiDic.targetEntity:GetSprite():Render(next_line,WikiDic.nullVector,WikiDic.nullVector)
-			local icon_offset = (not WikiDic.targetEntity:ToPickup():IsShopItem()) and WikiDic.iconNoShopItemOffset or WikiDic.iconOffset
-			local sprite = WikiDic.targetEntity:GetSprite()
-			-- I have to create a new vector, instead of use the old one.
-			local oldScale = Vector(sprite.Scale.X,sprite.Scale.Y)
-			sprite.Scale = WikiDic.iconScale
-			sprite:RenderLayer(1,next_line + icon_offset,WikiDic.nullVector,WikiDic.nullVector)
-			sprite.Scale = oldScale
+		if card_hold ~= 0 then
+			desc = WikiDic.cardDesc[card_hold] or (tostring(card_hold) .. "号卡牌没有收录") 
+		elseif WikiDic.targetEntity ~= nil then
+			if WikiDic.targetEntity.Variant == 100 then
+				--setup desc
+				desc = WikiDic.desc[WikiDic.targetEntity.SubType] or (tostring(WikiDic.targetEntity.SubType) .. "号道具\n\n没有收录")
+				--draw icon
+				local icon_offset = (not WikiDic.targetEntity:ToPickup():IsShopItem()) and WikiDic.iconNoShopItemOffset or WikiDic.iconOffset
+				local sprite = WikiDic.targetEntity:GetSprite()
+				-- I have to create a new vector, instead of use the old one.
+				local oldScale = Vector(sprite.Scale.X,sprite.Scale.Y)
+				sprite.Scale = WikiDic.iconScale
+				sprite:RenderLayer(1,next_line + icon_offset,WikiDic.nullVector,WikiDic.nullVector)
+				sprite.Scale = oldScale
+			end
+			if WikiDic.targetEntity.Variant == 350 then
+				--setup desc
+				desc = WikiDic.trinketDesc[WikiDic.targetEntity.SubType] or (tostring(WikiDic.targetEntity.SubType) .. "号饰品\n\n没有收录")
+				--draw icon
+				local icon_offset = WikiDic.trinketIconOffset
+				local sprite = WikiDic.targetEntity:GetSprite()
+				local oldScale = Vector(sprite.Scale.X,sprite.Scale.Y)
+				sprite.Scale = WikiDic.iconScale
+				sprite:RenderLayer(0,next_line + icon_offset,WikiDic.nullVector,WikiDic.nullVector)
+				sprite.Scale = oldScale
+			end
 		end
-		if WikiDic.targetEntity.Variant == 350 then
-			local icon_offset = WikiDic.trinketIconOffset
-			local sprite = WikiDic.targetEntity:GetSprite()
-			local oldScale = Vector(sprite.Scale.X,sprite.Scale.Y)
-			sprite.Scale = WikiDic.iconScale
-			sprite:RenderLayer(0,next_line + icon_offset,WikiDic.nullVector,WikiDic.nullVector)
-			sprite.Scale = oldScale
-		end
+
+		--draw text
 		repeat
 			local next = string.find(desc,"\n",last+1)
 			WikiDic.font:DrawStringScaledUTF8(string.sub(desc,last+1,(string.sub(desc,next or #desc,next) == '\n') and (next or #desc) - 1 or next),next_line.X,next_line.Y,WikiDic.fontScale,WikiDic.fontScale,KColor(1,1,1,0.6,0,0,0),0,true)

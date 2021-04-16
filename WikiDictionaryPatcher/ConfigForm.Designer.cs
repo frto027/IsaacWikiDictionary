@@ -42,6 +42,7 @@
             this.drawMouseNo = new System.Windows.Forms.RadioButton();
             this.drawMouseYes = new System.Windows.Forms.RadioButton();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.biggerFontSize = new System.Windows.Forms.RadioButton();
             this.halfFontSize = new System.Windows.Forms.RadioButton();
             this.fullFontSize = new System.Windows.Forms.RadioButton();
             this.yseButton = new System.Windows.Forms.Button();
@@ -49,7 +50,7 @@
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.defaultFont = new System.Windows.Forms.RadioButton();
             this.dxFont = new System.Windows.Forms.RadioButton();
-            this.biggerFontSize = new System.Windows.Forms.RadioButton();
+            this.label2 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -141,7 +142,7 @@
             // 
             this.groupBox3.Controls.Add(this.mousePos);
             this.groupBox3.Controls.Add(this.playerPos);
-            this.groupBox3.Location = new System.Drawing.Point(12, 95);
+            this.groupBox3.Location = new System.Drawing.Point(12, 112);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(271, 55);
             this.groupBox3.TabIndex = 3;
@@ -176,7 +177,7 @@
             this.groupBox4.Controls.Add(this.drawMouseNo);
             this.groupBox4.Controls.Add(this.drawMouseYes);
             this.groupBox4.Enabled = false;
-            this.groupBox4.Location = new System.Drawing.Point(289, 95);
+            this.groupBox4.Location = new System.Drawing.Point(289, 112);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(271, 55);
             this.groupBox4.TabIndex = 4;
@@ -211,12 +212,22 @@
             this.groupBox5.Controls.Add(this.biggerFontSize);
             this.groupBox5.Controls.Add(this.halfFontSize);
             this.groupBox5.Controls.Add(this.fullFontSize);
-            this.groupBox5.Location = new System.Drawing.Point(289, 156);
+            this.groupBox5.Location = new System.Drawing.Point(289, 173);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Size = new System.Drawing.Size(271, 55);
             this.groupBox5.TabIndex = 4;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "字体大小";
+            // 
+            // biggerFontSize
+            // 
+            this.biggerFontSize.AutoSize = true;
+            this.biggerFontSize.Location = new System.Drawing.Point(29, 20);
+            this.biggerFontSize.Name = "biggerFontSize";
+            this.biggerFontSize.Size = new System.Drawing.Size(71, 16);
+            this.biggerFontSize.TabIndex = 3;
+            this.biggerFontSize.Text = "更大尺寸";
+            this.biggerFontSize.UseVisualStyleBackColor = true;
             // 
             // halfFontSize
             // 
@@ -236,13 +247,14 @@
             this.fullFontSize.Name = "fullFontSize";
             this.fullFontSize.Size = new System.Drawing.Size(59, 16);
             this.fullFontSize.TabIndex = 1;
+            this.fullFontSize.TabStop = true;
             this.fullFontSize.Text = "全尺寸";
             this.fullFontSize.UseVisualStyleBackColor = true;
             this.fullFontSize.CheckedChanged += new System.EventHandler(this.fullFontSize_CheckedChanged);
             // 
             // yseButton
             // 
-            this.yseButton.Location = new System.Drawing.Point(208, 217);
+            this.yseButton.Location = new System.Drawing.Point(208, 234);
             this.yseButton.Name = "yseButton";
             this.yseButton.Size = new System.Drawing.Size(75, 23);
             this.yseButton.TabIndex = 5;
@@ -252,7 +264,7 @@
             // 
             // cancelButton
             // 
-            this.cancelButton.Location = new System.Drawing.Point(302, 217);
+            this.cancelButton.Location = new System.Drawing.Point(302, 234);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
             this.cancelButton.TabIndex = 6;
@@ -265,7 +277,7 @@
             this.groupBox6.Controls.Add(this.defaultFont);
             this.groupBox6.Controls.Add(this.dxFont);
             this.groupBox6.Enabled = false;
-            this.groupBox6.Location = new System.Drawing.Point(12, 156);
+            this.groupBox6.Location = new System.Drawing.Point(12, 173);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Size = new System.Drawing.Size(271, 55);
             this.groupBox6.TabIndex = 5;
@@ -294,22 +306,23 @@
             this.dxFont.Text = "等线";
             this.dxFont.UseVisualStyleBackColor = true;
             // 
-            // biggerFontSize
+            // label2
             // 
-            this.biggerFontSize.AutoSize = true;
-            this.biggerFontSize.Location = new System.Drawing.Point(29, 20);
-            this.biggerFontSize.Name = "biggerFontSize";
-            this.biggerFontSize.Size = new System.Drawing.Size(71, 16);
-            this.biggerFontSize.TabIndex = 3;
-            this.biggerFontSize.Text = "更大尺寸";
-            this.biggerFontSize.UseVisualStyleBackColor = true;
+            this.label2.AutoSize = true;
+            this.label2.ForeColor = System.Drawing.SystemColors.AppWorkspace;
+            this.label2.Location = new System.Drawing.Point(411, 90);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(149, 12);
+            this.label2.TabIndex = 7;
+            this.label2.Text = "卡牌信息暂只支持灰机wiki";
             // 
             // ConfigForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(572, 263);
+            this.ClientSize = new System.Drawing.Size(572, 268);
             this.ControlBox = false;
+            this.Controls.Add(this.label2);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.yseButton);
@@ -362,5 +375,6 @@
         private System.Windows.Forms.RadioButton defaultFont;
         private System.Windows.Forms.RadioButton dxFont;
         private System.Windows.Forms.RadioButton biggerFontSize;
+        private System.Windows.Forms.Label label2;
     }
 }
