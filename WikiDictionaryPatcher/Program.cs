@@ -602,7 +602,10 @@ namespace WikiDictionaryPatcher
                 var fontDir = new DirectoryInfo(RES_FONT_FOLDER_PATCH);
                 foreach (FileInfo font in fontDir.GetFiles())
                 {
-                    font.CopyTo(luaName + @"\..\..\wd_font\" + font.Name);
+                    try
+                    {
+                        font.CopyTo(luaName + @"\..\..\wd_font\" + font.Name);
+                    }catch(Exception e) { }
                 }
             }
         }

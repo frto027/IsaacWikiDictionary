@@ -194,7 +194,7 @@ end
 function WikiDic:RenderCallback()
 	WikiDic:InitFonts()
 
-	local card_hold = WikiDic.useHuijiWiki and Input.IsActionPressed(ButtonAction.ACTION_MAP,0) and Isaac.GetPlayer(0):GetCard(0) or 0
+	local card_hold = WikiDic.useHuijiWiki and Input.IsActionPressed(ButtonAction.ACTION_MAP,Isaac.GetPlayer(0).ControllerIndex) and Isaac.GetPlayer(0):GetCard(0) or 0
 
 	-- draw auth infos here
 	if WikiDic.authRemains > 0 then
