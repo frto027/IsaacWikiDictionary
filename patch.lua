@@ -19,7 +19,7 @@ WikiDic.authRemains = 60*9
 WikiDic.authTexts = {}
 
 WikiDic.huijiWikiInfo = {
-	"提示：按住Tab键显示手上持有的卡牌信息",
+	"提示：按住Tab键显示手上持有的卡牌/药丸/符文信息",
 	"中文图鉴信息来源：灰机wiki",
 	"https://isaac.huijiwiki.com/wiki",
 }
@@ -88,6 +88,9 @@ WikiDic.trinketDesc = {
 
 WikiDic.cardDesc = {
 -- FAKE_CARD_CONTENT --
+}
+WikiDic.pillDesc = {
+-- FAKE_PILL_CONTENT --
 }
 
 function WikiDic:Update()
@@ -188,17 +191,21 @@ function WikiDic:InitFonts()
 		WikiDic:FixReturn(WikiDic.desc)
 		WikiDic:FixReturn(WikiDic.trinketDesc)
 		WikiDic:FixReturn(WikiDic.cardDesc)
+		WikiDic:FixReturn(WikiDic.pillDesc)
 	end
 end
 
 function WikiDic:RenderCallback()
 	WikiDic:InitFonts()
 
-	local card_hold = WikiDic.useHuijiWiki and Input.IsActionPressed(ButtonAction.ACTION_MAP,Isaac.GetPlayer(0).ControllerIndex) and Isaac.GetPlayer(0):GetCard(0) or 0
+	local itemPool = Game():GetItemPool()
+	local pill_color = Isaac.GetPlayer(0):GetPill(0)
 
+	local card_hold = WikiDic.useHuijiWiki and Input.IsActionPressed(ButtonAction.ACTION_MAP,0) and Isaac.GetPlayer(0):GetCard(0) or 0
+	local pill_hold = WikiDic.useHuijiWiki and Input.IsActionPressed(ButtonAction.ACTION_MAP,0) and itemPool:IsPillIdentified(pill_color) and itemPool:GetPillEffect(pill_color) or -1
 	-- draw auth infos here
 	if WikiDic.authRemains > 0 then
-		if WikiDic.targetEntity ~= nil or card_hold ~= 0 then
+		if WikiDic.targetEntity ~= nil or Input.IsActionPressed(ButtonAction.ACTION_MAP,0) then
 			WikiDic.authRemains = 0
 		end
 
@@ -229,7 +236,7 @@ function WikiDic:RenderCallback()
 		WikiDic.cursur_sprite:Render(mousePos,WikiDic.nullVector,WikiDic.nullVector)
 	end
 
-	if WikiDic.targetEntity ~= nil or card_hold ~= 0 then
+	if WikiDic.targetEntity ~= nil or card_hold ~= 0 or pill_hold ~= -1 then
 		local desc = nil
 		local last = 0
 		local next_line = WikiDic.renderPos --Vector(rpos.X,rpos.Y)
@@ -240,6 +247,11 @@ function WikiDic:RenderCallback()
 
 		if card_hold ~= 0 then
 			desc = WikiDic.cardDesc[card_hold] or (tostring(card_hold) .. "号卡牌没有收录") 
+		elseif pill_hold ~= -1 then
+			desc = WikiDic.pillDesc[pill_hold] or (tostring(pill_hold) .. "药丸效果没有收录")
+			if pill_color > 2048 then
+				desc = desc .. "\n(效果增强)"
+			end
 		elseif WikiDic.targetEntity ~= nil then
 			if WikiDic.targetEntity.Variant == 100 then
 				--setup desc

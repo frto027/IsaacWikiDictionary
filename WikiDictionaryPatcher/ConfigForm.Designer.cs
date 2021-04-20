@@ -310,11 +310,11 @@
             // 
             this.label2.AutoSize = true;
             this.label2.ForeColor = System.Drawing.SystemColors.AppWorkspace;
-            this.label2.Location = new System.Drawing.Point(411, 90);
+            this.label2.Location = new System.Drawing.Point(381, 87);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(149, 12);
+            this.label2.Size = new System.Drawing.Size(179, 12);
             this.label2.TabIndex = 7;
-            this.label2.Text = "卡牌信息暂只支持灰机wiki";
+            this.label2.Text = "卡牌/药丸信息暂只支持灰机wiki";
             // 
             // ConfigForm
             // 

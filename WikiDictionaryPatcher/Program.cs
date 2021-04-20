@@ -33,8 +33,15 @@ namespace WikiDictionaryPatcher
             FAKE_DESC_CONTENT = "-- FAKE_DESC_CONTENT --",
             FAKE_TRINKET_DESC_CONTENT = "-- FAKE_TRINKET_CONTENT --",
             FAKE_CARD_DESC_CONTENT = "-- FAKE_CARD_CONTENT --",
+            FAKE_PILL_DESC_CONTENT = "-- FAKE_PILL_CONTENT --",
             FAKE_CONFIG_SEG_1 = "-- FAKE_CONFIG_SEG_1 --",
             FAKE_LINE_END = "-- WikiDict MARK END --";
+
+        private static string[] Versions =
+        {
+            "当前版本文件结构发生变化，请使用1.0.14及以前版本对游戏中的图鉴进行卸载","-- WIKIDIC_VERSION_1 --" //,"请使用xxx版本卸载","__LATEST_VERSION__"
+        };
+
 #if DEBUG
         private static string
             RES_MAIN_LUA_PATCH = @"..\..\..\patch.lua",
@@ -50,6 +57,19 @@ namespace WikiDictionaryPatcher
 
         private static string VersionUrl = "https://frto027.gitee.io/wiki-buffer/version.json";
         private static VersionInfo version = null;
+
+        private static string GetVersionUninstallTip(string s)
+        {
+            System.Diagnostics.Debug.Assert(Versions.Length % 2 == 0, "Versions needs to be odd");
+            for(int i=Versions.Length - 1;i >= 0;i-= 2)
+            {
+                if (s.Contains(Versions[i]))
+                {
+                    return i == Versions.Length - 1 ? null /* current version */ : Versions[i + 1]/* formal version */;
+                }
+            }
+            return Versions[0];
+        }
 
         [STAThread]
         static void Main(string[] args)
@@ -78,13 +98,13 @@ namespace WikiDictionaryPatcher
 
             bool patched = false;
             string lua_path = dialog.FileName + "\\..\\resources\\scripts\\main.lua";
-
+            string lua_text;
             using (FileStream f = new FileStream(lua_path, FileMode.Open))
             {
                 using(StreamReader reader = new StreamReader(f))
                 {
-                    string s = reader.ReadToEnd();
-                    patched = s.Contains(FAKE_LINE_BEGIN) && s.Contains(FAKE_LINE_END);
+                    lua_text = reader.ReadToEnd();
+                    patched = lua_text.Contains(FAKE_LINE_BEGIN) && lua_text.Contains(FAKE_LINE_END);
                     //Console.WriteLine(s);
                 }
             }
@@ -97,6 +117,12 @@ namespace WikiDictionaryPatcher
                 }
                 else
                 {
+                    string errorStr = GetVersionUninstallTip(lua_text);
+                    if(errorStr != null)
+                    {
+                        MessageBox.Show(errorStr);
+                        return;
+                    }
                     CancelPatch(lua_path);
                     MessageBox.Show("图鉴已经移除");
                     return;
@@ -146,11 +172,13 @@ namespace WikiDictionaryPatcher
             Dictionary<int, ItemDesc> descs = new Dictionary<int, ItemDesc>();
             Dictionary<int, ItemDesc> trinket_descs = new Dictionary<int, ItemDesc>();
             Dictionary<int, ItemDesc> card_descs = new Dictionary<int, ItemDesc>();
+            Dictionary<int, ItemDesc> pill_descs = new Dictionary<int, ItemDesc>();
             if (getHuijiWikiDesc)
             {
                 LinkedList<ItemDesc> huijiItemDesc = GetHuijiWikiItemDesc();
                 LinkedList<ItemDesc> huijiTrinketDesc = GetHuijiWikiTrinketDesc();
                 LinkedList<ItemDesc> huijiCardDesc = GetHuijiWikiCardDesc();
+                LinkedList<ItemDesc> huijiPillDesc = GetHuijiWikiPillDesc();
                 foreach(var item in huijiItemDesc)
                 {
                     descs.Add(item.id, item);
@@ -162,6 +190,10 @@ namespace WikiDictionaryPatcher
                 foreach(var item in huijiCardDesc)
                 {
                     card_descs.Add(item.id, item);
+                }
+                foreach(var item in huijiPillDesc)
+                {
+                    pill_descs.Add(item.id, item);
                 }
             }
 
@@ -214,7 +246,14 @@ namespace WikiDictionaryPatcher
                 d = d.Replace("\\", "\\\\").Replace("\n", "\\n").Replace("\"", "\\\"");
                 card_desc += string.Format("[{0}]=\"{1}\",\n", item.Value.id, d);
             }
-            AddPatch(lua_path, desc_dict, trinket_desc,card_desc, options);
+            string pill_desc = "";
+            foreach (var item in pill_descs)
+            {
+                string d = item.Value.name + "\n" + item.Value.desc;
+                d = d.Replace("\\", "\\\\").Replace("\n", "\\n").Replace("\"", "\\\"");
+                pill_desc += string.Format("[{0}]=\"{1}\",\n", item.Value.id, d);
+            }
+            AddPatch(lua_path, desc_dict, trinket_desc,card_desc,pill_desc, options);
             MessageBox.Show("操作完成");
         }
 
@@ -459,7 +498,33 @@ namespace WikiDictionaryPatcher
 
             return ret;
         }
+        public static LinkedList<ItemDesc> GetHuijiWikiPillDesc()
+        {
+            var ret = new LinkedList<ItemDesc>();
+            Console.WriteLine("正在下载灰机wiki中的药丸信息...");
 
+            ItemDesc current = null;
+            //教科书般的lambda表达式
+            DownloadItemDesc(version.huijiPillUrl, () => { current = new ItemDesc(); }, (id, node) => {
+                if (id == 0)
+                {
+                    current.name = Regex.Replace(node.LastChild.InnerText, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value);
+                }
+                if (id == 2)
+                {
+                    current.id = int.Parse(node.InnerText);
+                }
+                if (id == 5)
+                {
+                    string s_remove_file = Regex.Replace(node.InnerText, @"\[\[文件(.*?)(\|.*?)?\]\]", (e) => "").Replace("&nbsp;", "");
+                    current.desc = Regex.Replace(s_remove_file, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value);
+                }
+            }, (a, b) => { }, () => {
+                ret.AddLast(current);
+            });
+
+            return ret;
+        }
         private static HtmlNode Dfs(HtmlNode node, Func<HtmlNode, bool> f)
         {
             if (f(node))
@@ -525,7 +590,7 @@ namespace WikiDictionaryPatcher
             catch (IOException) { }
         }
 
-        private static void AddPatch(string luaName, string item_desc, string trinket_desc,string card_desc, DicOptions dicOptions)
+        private static void AddPatch(string luaName, string item_desc, string trinket_desc,string card_desc, string pill_desc, DicOptions dicOptions)
         {
             string next = "";
             bool isPatching = false;
@@ -563,7 +628,8 @@ namespace WikiDictionaryPatcher
                     {
                         if (line == FAKE_DESC_CONTENT)
                             patch += item_desc + "\n";
-                        else if (line == FAKE_CONFIG_SEG_1) {
+                        else if (line == FAKE_CONFIG_SEG_1)
+                        {
                             patch += "WikiDic.useHuijiWiki = " + (dicOptions.getHuijiWikiDesc ? "true" : "false") + "\n";
                             patch += "WikiDic.useFandomWiki = " + (dicOptions.useFandomWikiDesc ? "true" : "false") + "\n";
                             patch += "WikiDic.usePlayerPos = " + (dicOptions.use_player_pos ? "true" : "false") + "\n";
@@ -572,19 +638,25 @@ namespace WikiDictionaryPatcher
                             patch += "WikiDic.useHalfSizeFont = " + (dicOptions.use_half_size_font ? "true" : "false") + "\n";
                             patch += "WikiDic.useBiggerSizeFont = " + (dicOptions.use_bigger_font ? "true" : "false") + "\n";
                         }
-                        else if(line == FAKE_TRINKET_DESC_CONTENT)
+                        else if (line == FAKE_TRINKET_DESC_CONTENT)
                         {
                             patch += trinket_desc + "\n";
-                        }else if(line == FAKE_CARD_DESC_CONTENT)
+                        }
+                        else if (line == FAKE_CARD_DESC_CONTENT)
                         {
                             patch += card_desc + "\n";
-                        }else
+                        }
+                        else if (line == FAKE_PILL_DESC_CONTENT) {
+                            patch += pill_desc + "\n";
+                        }
+                        else
                             patch += line + "\n";
                     }
                 }
             }
             //patch to next
             next += FAKE_LINE_BEGIN + "\n";
+            next += Versions[Versions.Length - 1] + "\n";
             next += patch + "\n";
             next += FAKE_LINE_END + "\n";
 
