@@ -303,7 +303,7 @@
             this.dxFont.Size = new System.Drawing.Size(47, 16);
             this.dxFont.TabIndex = 1;
             this.dxFont.TabStop = true;
-            this.dxFont.Text = "等线";
+            this.dxFont.Text = "宋体";
             this.dxFont.UseVisualStyleBackColor = true;
             // 
             // label2

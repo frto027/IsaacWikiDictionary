@@ -187,7 +187,7 @@ end
 function WikiDic:InitFonts()
 	if WikiDic.font == nil then
 		WikiDic.font = Font()
-		WikiDic.font:Load(WikiDic.useDefaultFont and "font/terminus.fnt" or "wd_font/dx_wdic.fnt")
+		WikiDic.font:Load(WikiDic.useDefaultFont and "font/terminus.fnt" or "wd_font/st_wdic.fnt")
 		WikiDic:FixReturn(WikiDic.desc)
 		WikiDic:FixReturn(WikiDic.trinketDesc)
 		WikiDic:FixReturn(WikiDic.cardDesc)
