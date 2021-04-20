@@ -203,6 +203,10 @@ function WikiDic:RenderCallback()
 
 	local card_hold = WikiDic.useHuijiWiki and Input.IsActionPressed(ButtonAction.ACTION_MAP,0) and Isaac.GetPlayer(0):GetCard(0) or 0
 	local pill_hold = WikiDic.useHuijiWiki and Input.IsActionPressed(ButtonAction.ACTION_MAP,0) and itemPool:IsPillIdentified(pill_color) and itemPool:GetPillEffect(pill_color) or -1
+	if pill_hold == 31 then
+		-- ??? pill
+		pill_hold = -1
+	end
 	-- draw auth infos here
 	if WikiDic.authRemains > 0 then
 		if WikiDic.targetEntity ~= nil or Input.IsActionPressed(ButtonAction.ACTION_MAP,0) then
