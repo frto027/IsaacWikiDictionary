@@ -16,6 +16,7 @@ WikiDic.fontScale = 1
 WikiDic.distYMulti = 1
 WikiDic.taintIsaacOffset = Vector(0,25)
 WikiDic.authRemains = 60*9
+WikiDic.lineDistance = 0
 WikiDic.authTexts = {}
 
 WikiDic.huijiWikiInfo = {
@@ -63,6 +64,7 @@ if WikiDic.useBiggerSizeFont then
 	WikiDic.iconScale = Vector(1.2,1.2)
 	WikiDic.fontScale = 1.2
 	WikiDic.taintIsaacOffset = Vector(0,25)
+	WikiDic.lineDistance = 3
 end
 if WikiDic.useHuijiWiki then
 	for _,text in pairs(WikiDic.huijiWikiInfo) do
@@ -198,10 +200,12 @@ end
 function WikiDic:RenderCallback()
 	WikiDic:InitFonts()
 
+	local is_Jacob_and_Esau = Isaac.GetPlayer(0).SubType == 19 and Isaac.GetPlayer(1).SubType == 20
+	local player_index = is_Jacob_and_Esau and Input.IsActionPressed(ButtonAction.ACTION_DROP,Isaac.GetPlayer(0).ControllerIndex) and 1 or 0
+	
 	local itemPool = Game():GetItemPool()
-	local pill_color = Isaac.GetPlayer(0):GetPill(0)
-
-	local card_hold = WikiDic.useHuijiWiki and Input.IsActionPressed(ButtonAction.ACTION_MAP,Isaac.GetPlayer(0).ControllerIndex) and Isaac.GetPlayer(0):GetCard(0) or 0
+	local pill_color = Isaac.GetPlayer(player_index):GetPill(0)
+	local card_hold = WikiDic.useHuijiWiki and Input.IsActionPressed(ButtonAction.ACTION_MAP,Isaac.GetPlayer(0).ControllerIndex) and Isaac.GetPlayer(player_index):GetCard(0) or 0
 	local pill_hold = WikiDic.useHuijiWiki and Input.IsActionPressed(ButtonAction.ACTION_MAP,Isaac.GetPlayer(0).ControllerIndex) and itemPool:IsPillIdentified(pill_color) and itemPool:GetPillEffect(pill_color) or -1
 	if pill_hold == 31 then
 		-- ??? pill
@@ -224,7 +228,7 @@ function WikiDic:RenderCallback()
 
 		for _,text in pairs(WikiDic.authTexts) do
 			WikiDic.font:DrawStringScaledUTF8(text,WikiDic.renderPos.X,y_pos,WikiDic.fontScale,WikiDic.fontScale,KColor(1,1,1,alpha,0,0,0),0,true)
-			y_pos = y_pos + WikiDic.font:GetLineHeight()
+			y_pos = y_pos + WikiDic.font:GetLineHeight() * WikiDic.fontScale + WikiDic.lineDistance
 		end
 		return
 	end
@@ -286,7 +290,7 @@ function WikiDic:RenderCallback()
 		repeat
 			local next = string.find(desc,"\n",last+1)
 			WikiDic.font:DrawStringScaledUTF8(string.sub(desc,last+1,(string.sub(desc,next or #desc,next) == '\n') and (next or #desc) - 1 or next),next_line.X,next_line.Y,WikiDic.fontScale,WikiDic.fontScale,KColor(1,1,1,0.6,0,0,0),0,true)
-			next_line = next_line + Vector(0,WikiDic.font:GetLineHeight()*WikiDic.fontScale)
+			next_line = next_line + Vector(0,WikiDic.font:GetLineHeight()*WikiDic.fontScale + WikiDic.lineDistance)
 			last = next
 		until last == nil
 		-- WikiDic.font:DrawStringUTF8 (desc,rpos.X,rpos.Y,KColor(1,1,1,1,0,0,0),0,true)
