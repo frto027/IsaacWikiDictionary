@@ -15,6 +15,7 @@ WikiDic.iconScale = Vector(1,1)
 WikiDic.fontScale = 1
 WikiDic.distYMulti = 1
 WikiDic.taintIsaacOffset = Vector(0,25)
+WikiDic.taintQQQOffset = Vector(0,15)
 WikiDic.authRemains = 60*9
 WikiDic.lineDistance = 0
 WikiDic.authTexts = {}
@@ -252,7 +253,10 @@ function WikiDic:RenderCallback()
 		if Isaac.GetPlayer(0).SubType == 21 then
 			next_line = next_line + WikiDic.taintIsaacOffset
 		end
-
+		-- taint ??? is 25
+		if Isaac.GetPlayer(0).SubType == 25 then
+			next_line = next_line + WikiDic.taintQQQOffset
+		end
 		if card_hold ~= 0 then
 			desc = WikiDic.cardDesc[card_hold] or (tostring(card_hold) .. "号卡牌没有收录") 
 		elseif pill_hold ~= -1 then
