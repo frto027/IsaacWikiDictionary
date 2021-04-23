@@ -1,4 +1,8 @@
-﻿using HtmlAgilityPack;
+﻿#if DEBUG
+#define USE_DIRECT_WIKI_ACCESS
+#endif
+
+using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -36,7 +40,7 @@ namespace WikiDictionaryPatcher
             FAKE_PILL_DESC_CONTENT = "-- FAKE_PILL_CONTENT --",
             FAKE_CONFIG_SEG_1 = "-- FAKE_CONFIG_SEG_1 --",
             FAKE_LINE_END = "-- WikiDict MARK END --";
-
+        //this is file version
         private static string[] Versions =
         {
             "当前版本文件结构发生变化，请使用1.0.14及以前版本对游戏中的图鉴进行卸载","-- WIKIDIC_VERSION_1 --" //,"请使用xxx版本卸载","__LATEST_VERSION__"
@@ -51,7 +55,8 @@ namespace WikiDictionaryPatcher
             RES_MAIN_LUA_PATCH = @"patch.lua",
             RES_FONT_FOLDER_PATCH = "wd_font";
 #endif
-        private static int VERSION = 1;
+        //this is network version, instead of file version
+        private static int VERSION = 2;
         private static string USER_AGENT = string.Format("IsaacWikiDicInstaller/{0} (https://gitee.com/frto027/isaac-wiki-dictionary; huiji_wiki_user:Frto027; 602706150@qq.com) .NetFramework/4.7.2", VERSION);
 
 
@@ -130,7 +135,14 @@ namespace WikiDictionaryPatcher
             }
 
             Console.WriteLine("正在下载元数据...");
-
+#if USE_DIRECT_WIKI_ACCESS
+#if !DEBUG
+            Console.WriteLine("禁止以直接WIKI访问进行Release发布！");
+            return 0;
+#endif
+            version = GetDirectVersion();
+            MessageBox.Show("当前信息直接来自无缓存wiki，仅作为调试使用，为了更好的维护WIKI生态，请不要编译发布此版本哦");
+#else
             HttpWebRequest request = HttpWebRequest.CreateHttp(VersionUrl);
             request.UserAgent = USER_AGENT;
             using (var stream = request.GetResponse().GetResponseStream())
@@ -147,6 +159,7 @@ namespace WikiDictionaryPatcher
                     }
                 }
             }
+#endif
             if (version == null)
             {
                 MessageBox.Show("元数据下载失败，请检查网络或更新版本。");
@@ -349,6 +362,7 @@ namespace WikiDictionaryPatcher
                 if (id == 0)
                 {
                     string rm_str = node;
+                    rm_str = rm_str.Substring(rm_str.IndexOf("| ")+2);
                     rm_str = Regex.Replace(rm_str, @"\[\[file:.*?\]\]", (e) => "");
                     rm_str = Regex.Replace(rm_str, @"\[\[category:.*?\]\]", (e) => "");
                     rm_str = Regex.Replace(rm_str, @"\<span.*?\>", (e) => "");
@@ -388,6 +402,7 @@ namespace WikiDictionaryPatcher
                 if (id == 0)
                 {
                     string rm_str = node;
+                    rm_str = rm_str.Substring(rm_str.IndexOf("| ") + 2);
                     rm_str = Regex.Replace(rm_str, @"\[\[file:.*?\]\]", (e) => "");
                     rm_str = Regex.Replace(rm_str, @"\[\[category:.*?\]\]", (e) => "");
                     rm_str = Regex.Replace(rm_str, @"\<span.*?\>", (e) => "");
@@ -432,7 +447,7 @@ namespace WikiDictionaryPatcher
                 {
                     current.id = int.Parse(node.InnerText);
                 }
-                if(id == 5)
+                if(id == 6)
                 {
                     string s_remove_file = Regex.Replace(node.InnerText, @"\[\[文件(.*?)(\|.*?)?\]\]", (e) => "").Replace("&nbsp;","");
                     current.desc = Regex.Replace(s_remove_file, @"\[\[(.*?)(\|.*?)?\]\]", (e) => e.Groups[1].Value);
@@ -460,7 +475,7 @@ namespace WikiDictionaryPatcher
                 {
                     current.id = int.Parse(node.InnerText);
                 }
-                if (id == 5)
+                if (id == 6)
                 {
                     string s_remove_file = Regex.Replace(node.InnerText, @"\[\[文件(.*?)(\|.*?)?\]\]", (e) => "").Replace("&nbsp;", "");
                     current.desc = Regex.Replace(s_remove_file, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value);
@@ -487,7 +502,7 @@ namespace WikiDictionaryPatcher
                 {
                     current.id = int.Parse(node.InnerText);
                 }
-                if (id == 5)
+                if (id == 6)
                 {
                     string s_remove_file = Regex.Replace(node.InnerText, @"\[\[文件(.*?)(\|.*?)?\]\]", (e) => "").Replace("&nbsp;", "");
                     current.desc = Regex.Replace(s_remove_file, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value);
@@ -514,7 +529,7 @@ namespace WikiDictionaryPatcher
                 {
                     current.id = int.Parse(node.InnerText);
                 }
-                if (id == 5)
+                if (id == 6)
                 {
                     string s_remove_file = Regex.Replace(node.InnerText, @"\[\[文件(.*?)(\|.*?)?\]\]", (e) => "").Replace("&nbsp;", "");
                     current.desc = Regex.Replace(s_remove_file, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value);
@@ -682,5 +697,20 @@ namespace WikiDictionaryPatcher
             }
         }
 
+#if DEBUG
+        private static VersionInfo GetDirectVersion()
+        {
+            return new VersionInfo()
+            {
+                invalid_last = VERSION,
+                huijiItemUrl = @"https://isaac.huijiwiki.com/api.php?action=expandtemplates&prop=wikitext&format=json&text={{道具查询|条件=[[Type::道具]]}}",
+                huijiTrinketUrl = @"https://isaac.huijiwiki.com/api.php?action=expandtemplates&prop=wikitext&format=json&text={{道具查询|条件=[[Type::饰品]]}}",
+                huijiCardUrl = @"https://isaac.huijiwiki.com/api.php?action=expandtemplates&prop=wikitext&format=json&text={{道具查询|条件=[[Type::卡牌]]}}",
+                huijiPillUrl = @"https://isaac.huijiwiki.com/api.php?action=expandtemplates&prop=wikitext&format=json&text={{道具查询|条件=[[Type::药丸]]}}",
+                fandomItemUrl = @"https://bindingofisaacrebirth.fandom.com/api.php?action=expandtemplates&format=json&prop=wikitext&text={{collectible table}}",
+                fandomTrinketUrl = @"https://bindingofisaacrebirth.fandom.com/api.php?action=expandtemplates&format=json&prop=wikitext&text={{trinket table}}",
+            };
+        }
+#endif
     }
 }
