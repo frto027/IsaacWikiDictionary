@@ -198,6 +198,29 @@ function WikiDic:InitFonts()
 	end
 end
 
+function WikiDic:RandStr(eid)
+	local rng = RNG()
+	rng:SetSeed((eid + Game():GetSeeds():GetStartSeed()) % 0x100000000,4)
+	local str = ""
+	local strlen = rng:RandomInt(30) + 20
+	local lineStart = 0
+	local firstLineLen = rng:RandomInt(4) + 3
+
+	local line_length = 0
+
+	while strlen > 0 do
+		strlen = strlen - 1
+		local word = rng:RandomInt(0x9FA5 - 0x4E00 + 1) + 0x4E00
+		str = str .. string.char(0xE0 + (word >> 12), 0x80 + ((word >> 6) & 0x3F),0x80 + (word & 0x3F))
+		if firstLineLen == 0 or (WikiDic.font:GetStringWidth(string.sub(str,lineStart)) > WikiDic.lineWrap or (#str - lineStart > 20 and rng:RandomInt(8) == 1)) then
+			str = str .. '\n'
+			lineStart = #str
+		end
+		firstLineLen = firstLineLen - 1
+	end
+	return str
+end
+
 function WikiDic:RenderCallback()
 	WikiDic:InitFonts()
 
@@ -267,7 +290,18 @@ function WikiDic:RenderCallback()
 		elseif WikiDic.targetEntity ~= nil then
 			if WikiDic.targetEntity.Variant == 100 then
 				--setup desc
-				desc = WikiDic.desc[WikiDic.targetEntity.SubType] or (tostring(WikiDic.targetEntity.SubType) .. "号道具\n\n没有收录")
+				local entity_id = WikiDic.targetEntity.SubType
+				if (entity_id & 0x80000000) ~= 0 then
+					-- TMTRAINER
+					-- this is a very simple random string buffer
+					if WikiDic.lastRandTarget ~= entity_id or WikiDic.randText == nil then
+						WikiDic.randText = WikiDic:RandStr(entity_id)
+						WikiDic.lastRandTarget = entity_id
+					end
+					desc = WikiDic.randText
+				else
+					desc = WikiDic.desc[entity_id] or (tostring(entity_id) .. "号道具\n\n没有收录")
+				end
 				--draw icon
 				local icon_offset = (not WikiDic.targetEntity:ToPickup():IsShopItem()) and WikiDic.iconNoShopItemOffset or WikiDic.iconOffset
 				local sprite = WikiDic.targetEntity:GetSprite()
