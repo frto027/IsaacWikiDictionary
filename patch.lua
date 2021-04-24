@@ -278,8 +278,17 @@ function WikiDic:RenderCallback()
 				sprite.Scale = oldScale
 			end
 			if WikiDic.targetEntity.Variant == 350 then
+				local trinket_id = WikiDic.targetEntity.SubType
+				local is_gold = false
+				if trinket_id > 32768 then
+					is_gold = true
+					trinket_id = trinket_id - 32768
+				end
 				--setup desc
-				desc = WikiDic.trinketDesc[WikiDic.targetEntity.SubType] or (tostring(WikiDic.targetEntity.SubType) .. "号饰品\n\n没有收录")
+				desc = WikiDic.trinketDesc[trinket_id] or (tostring(trinket_id) .. "号饰品\n\n没有收录")
+				if is_gold then
+					desc = "(金色的)" .. desc 
+				end
 				--draw icon
 				local icon_offset = WikiDic.trinketIconOffset
 				local sprite = WikiDic.targetEntity:GetSprite()
