@@ -48,13 +48,13 @@
             this.yseButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
+            this.dxFont12 = new System.Windows.Forms.RadioButton();
+            this.dxFont16 = new System.Windows.Forms.RadioButton();
+            this.stFont16 = new System.Windows.Forms.RadioButton();
+            this.stFont10 = new System.Windows.Forms.RadioButton();
             this.defaultFont = new System.Windows.Forms.RadioButton();
             this.stFont12 = new System.Windows.Forms.RadioButton();
             this.label2 = new System.Windows.Forms.Label();
-            this.stFont10 = new System.Windows.Forms.RadioButton();
-            this.stFont16 = new System.Windows.Forms.RadioButton();
-            this.dxFont16 = new System.Windows.Forms.RadioButton();
-            this.dxFont12 = new System.Windows.Forms.RadioButton();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -258,7 +258,7 @@
             // 
             // yseButton
             // 
-            this.yseButton.Location = new System.Drawing.Point(201, 332);
+            this.yseButton.Location = new System.Drawing.Point(201, 307);
             this.yseButton.Name = "yseButton";
             this.yseButton.Size = new System.Drawing.Size(75, 23);
             this.yseButton.TabIndex = 5;
@@ -268,7 +268,7 @@
             // 
             // cancelButton
             // 
-            this.cancelButton.Location = new System.Drawing.Point(282, 332);
+            this.cancelButton.Location = new System.Drawing.Point(282, 307);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
             this.cancelButton.TabIndex = 6;
@@ -291,6 +291,47 @@
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "字体";
             // 
+            // dxFont12
+            // 
+            this.dxFont12.AutoSize = true;
+            this.dxFont12.Location = new System.Drawing.Point(145, 48);
+            this.dxFont12.Name = "dxFont12";
+            this.dxFont12.Size = new System.Drawing.Size(83, 16);
+            this.dxFont12.TabIndex = 6;
+            this.dxFont12.Text = "等线(12号)";
+            this.dxFont12.UseVisualStyleBackColor = true;
+            // 
+            // dxFont16
+            // 
+            this.dxFont16.AutoSize = true;
+            this.dxFont16.Location = new System.Drawing.Point(18, 48);
+            this.dxFont16.Name = "dxFont16";
+            this.dxFont16.Size = new System.Drawing.Size(83, 16);
+            this.dxFont16.TabIndex = 5;
+            this.dxFont16.Text = "等线(16号)";
+            this.dxFont16.UseVisualStyleBackColor = true;
+            // 
+            // stFont16
+            // 
+            this.stFont16.AutoSize = true;
+            this.stFont16.Location = new System.Drawing.Point(145, 20);
+            this.stFont16.Name = "stFont16";
+            this.stFont16.Size = new System.Drawing.Size(83, 16);
+            this.stFont16.TabIndex = 4;
+            this.stFont16.Text = "宋体(16号)";
+            this.stFont16.UseVisualStyleBackColor = true;
+            this.stFont16.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged_1);
+            // 
+            // stFont10
+            // 
+            this.stFont10.AutoSize = true;
+            this.stFont10.Location = new System.Drawing.Point(18, 77);
+            this.stFont10.Name = "stFont10";
+            this.stFont10.Size = new System.Drawing.Size(83, 16);
+            this.stFont10.TabIndex = 3;
+            this.stFont10.Text = "宋体(10号)";
+            this.stFont10.UseVisualStyleBackColor = true;
+            // 
             // defaultFont
             // 
             this.defaultFont.AutoSize = true;
@@ -311,6 +352,7 @@
             this.stFont12.Name = "stFont12";
             this.stFont12.Size = new System.Drawing.Size(83, 16);
             this.stFont12.TabIndex = 1;
+            this.stFont12.TabStop = true;
             this.stFont12.Text = "宋体(12号)";
             this.stFont12.UseVisualStyleBackColor = true;
             // 
@@ -324,52 +366,11 @@
             this.label2.TabIndex = 7;
             this.label2.Text = "卡牌/药丸信息暂只支持灰机wiki";
             // 
-            // stFont10
-            // 
-            this.stFont10.AutoSize = true;
-            this.stFont10.Location = new System.Drawing.Point(18, 77);
-            this.stFont10.Name = "stFont10";
-            this.stFont10.Size = new System.Drawing.Size(83, 16);
-            this.stFont10.TabIndex = 3;
-            this.stFont10.Text = "宋体(10号)";
-            this.stFont10.UseVisualStyleBackColor = true;
-            // 
-            // stFont16
-            // 
-            this.stFont16.AutoSize = true;
-            this.stFont16.Location = new System.Drawing.Point(145, 20);
-            this.stFont16.Name = "stFont16";
-            this.stFont16.Size = new System.Drawing.Size(83, 16);
-            this.stFont16.TabIndex = 4;
-            this.stFont16.Text = "宋体(16号)";
-            this.stFont16.UseVisualStyleBackColor = true;
-            this.stFont16.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged_1);
-            // 
-            // dxFont16
-            // 
-            this.dxFont16.AutoSize = true;
-            this.dxFont16.Location = new System.Drawing.Point(18, 48);
-            this.dxFont16.Name = "dxFont16";
-            this.dxFont16.Size = new System.Drawing.Size(83, 16);
-            this.dxFont16.TabIndex = 5;
-            this.dxFont16.Text = "等线(16号)";
-            this.dxFont16.UseVisualStyleBackColor = true;
-            // 
-            // dxFont12
-            // 
-            this.dxFont12.AutoSize = true;
-            this.dxFont12.Location = new System.Drawing.Point(145, 48);
-            this.dxFont12.Name = "dxFont12";
-            this.dxFont12.Size = new System.Drawing.Size(83, 16);
-            this.dxFont12.TabIndex = 6;
-            this.dxFont12.Text = "等线(12号)";
-            this.dxFont12.UseVisualStyleBackColor = true;
-            // 
             // ConfigForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(572, 394);
+            this.ClientSize = new System.Drawing.Size(572, 340);
             this.ControlBox = false;
             this.Controls.Add(this.label2);
             this.Controls.Add(this.groupBox6);
