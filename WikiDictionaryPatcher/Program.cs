@@ -1,5 +1,5 @@
 ﻿#if DEBUG
-#define USE_DIRECT_WIKI_ACCESS
+//#define USE_DIRECT_WIKI_ACCESS
 #endif
 
 using HtmlAgilityPack;
@@ -363,11 +363,15 @@ namespace WikiDictionaryPatcher
                 {
                     string rm_str = node;
                     rm_str = rm_str.Substring(rm_str.IndexOf("| ")+2);
+
+                    //file:dlc anr indicator.png Added in Repetance ... -> \n[Added in Repetance]
+                    //rm_str = Regex.Replace(rm_str, @"\[\[file:dlc [anr]+ indicator\.png\|[^|]+\|[^|]+\|([^\]]+)\]\]", e => "[" + e.Groups[1].Value + "]");
                     rm_str = Regex.Replace(rm_str, @"\[\[file:.*?\]\]", (e) => "");
                     rm_str = Regex.Replace(rm_str, @"\[\[category:.*?\]\]", (e) => "");
                     rm_str = Regex.Replace(rm_str, @"\<span.*?\>", (e) => "");
                     rm_str = Regex.Replace(rm_str, @"\</span\>", (e) => "");
                     rm_str = rm_str.Replace("<br>", "\n");
+                    rm_str = Regex.Replace(rm_str, @"\n+", e => "", RegexOptions.Multiline);
                     current.name = Regex.Replace(rm_str, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value).Trim();
                 }
                 if (id == 1)
@@ -377,11 +381,14 @@ namespace WikiDictionaryPatcher
                 if (id == 4)
                 {
                     string rm_str = node;
+                    rm_str = Regex.Replace(rm_str, @"\[\[file:dlc [anr]+ indicator\.png\|[^|]+\|[^|]+\|([^\]]+)\]\]", e => "\n[" + e.Groups[1].Value + "]");
                     rm_str = Regex.Replace(rm_str, @"\[\[file:.*?\]\]", (e) => "");
                     rm_str = Regex.Replace(rm_str, @"\[\[category:.*?\]\]", (e) => "");
                     rm_str = Regex.Replace(rm_str, @"\<span.*?\>", (e) => "");
                     rm_str = Regex.Replace(rm_str, @"\</span\>", (e) => "");
                     rm_str = rm_str.Replace("<br>", "\n");
+                    rm_str = Regex.Replace(rm_str, @"\n+", e => "\n",RegexOptions.Multiline);
+                    rm_str = rm_str.TrimStart('\n');
                     current.desc = Regex.Replace(rm_str, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value);
                 }
             }, () => {
@@ -403,11 +410,14 @@ namespace WikiDictionaryPatcher
                 {
                     string rm_str = node;
                     rm_str = rm_str.Substring(rm_str.IndexOf("| ") + 2);
+                    //rm_str = Regex.Replace(rm_str, @"\[\[file:dlc [anr]+ indicator\.png\|[^|]+\|[^|]+\|([^\]]+)\]\]", e => "[" + e.Groups[1].Value + "]");
                     rm_str = Regex.Replace(rm_str, @"\[\[file:.*?\]\]", (e) => "");
                     rm_str = Regex.Replace(rm_str, @"\[\[category:.*?\]\]", (e) => "");
                     rm_str = Regex.Replace(rm_str, @"\<span.*?\>", (e) => "");
                     rm_str = Regex.Replace(rm_str, @"\</span\>", (e) => "");
                     rm_str = rm_str.Replace("<br>", "\n");
+                    rm_str = rm_str.Replace("<br>", "\n");
+                    rm_str = Regex.Replace(rm_str, @"\n+", e => "", RegexOptions.Multiline);
                     current.name = Regex.Replace(rm_str, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value).Trim();
                 }
                 if (id == 1)
@@ -417,11 +427,14 @@ namespace WikiDictionaryPatcher
                 if (id == 4)
                 {
                     string rm_str = node;
+                    rm_str = Regex.Replace(rm_str, @"\[\[file:dlc [anr]+ indicator\.png\|[^|]+\|[^|]+\|([^\]]+)\]\]", e => "[" + e.Groups[1].Value + "]");
                     rm_str = Regex.Replace(rm_str, @"\[\[file:.*?\]\]", (e) => "");
                     rm_str = Regex.Replace(rm_str, @"\[\[category:.*?\]\]", (e) => "");
                     rm_str = Regex.Replace(rm_str, @"\<span.*?\>", (e) => "");
                     rm_str = Regex.Replace(rm_str, @"\</span\>", (e) => "");
                     rm_str = rm_str.Replace("<br>", "\n");
+                    rm_str = Regex.Replace(rm_str, @"\n+", e => "\n", RegexOptions.Multiline);
+                    rm_str = rm_str.TrimStart('\n');
                     current.desc = Regex.Replace(rm_str, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value);
                 }
             }, () => {
