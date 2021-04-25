@@ -17,13 +17,6 @@ namespace WikiDictionaryPatcher
         {
             InitializeComponent();
             this.options = options;
-            options.getHuijiWikiDesc = useHuijiYse.Checked;
-            options.useFandomWikiDesc = useFandomYes.Checked;
-            options.use_default_font = defaultFont.Checked;
-            options.use_half_size_font = halfFontSize.Checked;
-            options.use_player_pos = playerPos.Checked;
-            options.draw_mouse = drawMouseYes.Checked;
-            options.use_bigger_font = biggerFontSize.Checked;
         }
 
         private void radioButton8_CheckedChanged(object sender, EventArgs e)
@@ -52,6 +45,12 @@ namespace WikiDictionaryPatcher
             options.use_player_pos = playerPos.Checked;
             options.draw_mouse = drawMouseYes.Checked;
             options.use_bigger_font = biggerFontSize.Checked;
+            options.use_st_10_font = stFont10.Checked;
+            options.use_st_12_font = stFont12.Checked;
+            options.use_st_16_font = stFont16.Checked;
+            options.use_dx_16_font = dxFont16.Checked;
+            options.use_dx_12_font = dxFont12.Checked;
+            options.use_default_font = defaultFont.Checked;
             Close();
         }
 
@@ -62,9 +61,9 @@ namespace WikiDictionaryPatcher
             if(useHuijiNo.Checked)
                 useFandomYes.Checked = true;
             //font
-            groupBox6.Enabled = useHuijiNo.Checked;
-            if (useHuijiYse.Checked)
-                dxFont.Checked = true;
+            defaultFont.Enabled = useHuijiNo.Checked;
+            if (useHuijiYse.Checked && defaultFont.Checked)
+                stFont12.Checked = true;
         }
 
         private void mousePos_CheckedChanged(object sender, EventArgs e)
@@ -81,6 +80,16 @@ namespace WikiDictionaryPatcher
         }
 
         private void fullFontSize_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void defaultFont_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void radioButton1_CheckedChanged_1(object sender, EventArgs e)
         {
 
         }

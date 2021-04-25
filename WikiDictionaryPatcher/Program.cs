@@ -26,8 +26,9 @@ namespace WikiDictionaryPatcher
     {
         public bool canceled;
         public bool getHuijiWikiDesc, useFandomWikiDesc;
-        public bool use_player_pos, draw_mouse, use_default_font, use_half_size_font;
+        public bool use_player_pos, draw_mouse, use_half_size_font;
         public bool use_bigger_font;
+        public bool use_dx_16_font, use_dx_12_font, use_st_16_font, use_st_12_font,use_st_10_font, use_default_font;
     }
 
     class Program
@@ -698,15 +699,34 @@ namespace WikiDictionaryPatcher
             //patch font
             if (!dicOptions.use_default_font)
             {
+                string fntName = "st_wdic";
+                if (dicOptions.use_st_12_font)
+                    fntName = "st_wdic";
+                else if (dicOptions.use_st_10_font)
+                    fntName = "st10_wdic";
+                else if (dicOptions.use_st_16_font)
+                    fntName = "st16_wdic";
+                else if (dicOptions.use_dx_16_font)
+                    fntName = "dx16_wdic";
+                else if (dicOptions.use_dx_12_font)
+                    fntName = "dx12_wdic";
+                //copy font
                 Directory.CreateDirectory(luaName + @"\..\..\wd_font");
                 var fontDir = new DirectoryInfo(RES_FONT_FOLDER_PATCH);
                 foreach (FileInfo font in fontDir.GetFiles())
                 {
+                    if (!font.Name.StartsWith(fntName))
+                        continue;
+                    string target_name = font.Name;
+                    if (target_name.EndsWith(".fnt"))
+                        target_name = "wdic_font.fnt";
                     try
                     {
-                        font.CopyTo(luaName + @"\..\..\wd_font\" + font.Name);
-                    }catch(Exception e) { }
+                        font.CopyTo(luaName + @"\..\..\wd_font\" + target_name);
+                    }
+                    catch (Exception e) { }
                 }
+
             }
         }
 
