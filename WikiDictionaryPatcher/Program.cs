@@ -47,6 +47,13 @@ namespace WikiDictionaryPatcher
             "当前版本文件结构发生变化，请使用1.0.14及以前版本对游戏中的图鉴进行卸载","-- WIKIDIC_VERSION_1 --" //,"请使用xxx版本卸载","__LATEST_VERSION__"
         };
 
+        private static string[] TranslateSpanMap = new string[]
+        {
+            "在忏悔版本被移除","忏悔移除",
+            "在胎衣版本被移除","胎衣移除",
+            "忏悔版本新增","忏悔新增",
+            "胎衣版本新增","胎衣新增",
+        };
 #if DEBUG
         private static string
             RES_MAIN_LUA_PATCH = @"..\..\..\patch.lua",
@@ -463,7 +470,25 @@ namespace WikiDictionaryPatcher
                 }
                 if(id == 6)
                 {
-                    string s_remove_file = Regex.Replace(node.InnerText, @"\[\[文件(.*?)(\|.*?)?\]\]", (e) => "").Replace("&nbsp;","");
+                    string str = "";
+                    foreach (var child in node.ChildNodes)
+                    {
+                        if(child.Name == "span")
+                        {
+                            var s = child.GetAttributeValue("title","");
+                            //translate s
+                            for (int i = 0; i < TranslateSpanMap.Length; i += 2)
+                                if (s == TranslateSpanMap[i])
+                                    s = TranslateSpanMap[i + 1];
+                            if (s != null)
+                                str += "[" + s + "]";
+                        }
+                        else
+                        {
+                            str += child.InnerText;
+                        }
+                    }
+                    string s_remove_file = Regex.Replace(str, @"\[\[文件(.*?)(\|.*?)?\]\]", (e) => "").Replace("&nbsp;","");
                     current.desc = Regex.Replace(s_remove_file, @"\[\[(.*?)(\|.*?)?\]\]", (e) => e.Groups[1].Value);
                 }
             },(a, b) => { },() => {
@@ -491,7 +516,25 @@ namespace WikiDictionaryPatcher
                 }
                 if (id == 6)
                 {
-                    string s_remove_file = Regex.Replace(node.InnerText, @"\[\[文件(.*?)(\|.*?)?\]\]", (e) => "").Replace("&nbsp;", "");
+                    string str = "";
+                    foreach (var child in node.ChildNodes)
+                    {
+                        if (child.Name == "span")
+                        {
+                            var s = child.GetAttributeValue("title", "");
+                            //translate s
+                            for (int i = 0; i < TranslateSpanMap.Length; i += 2)
+                                if (s == TranslateSpanMap[i])
+                                    s = TranslateSpanMap[i + 1];
+                            if (s != null)
+                                str += "[" + s + "]";
+                        }
+                        else
+                        {
+                            str += child.InnerText;
+                        }
+                    }
+                    string s_remove_file = Regex.Replace(str, @"\[\[文件(.*?)(\|.*?)?\]\]", (e) => "").Replace("&nbsp;", "");
                     current.desc = Regex.Replace(s_remove_file, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value);
                 }
             }, (a, b) => { }, () => {
@@ -518,7 +561,25 @@ namespace WikiDictionaryPatcher
                 }
                 if (id == 6)
                 {
-                    string s_remove_file = Regex.Replace(node.InnerText, @"\[\[文件(.*?)(\|.*?)?\]\]", (e) => "").Replace("&nbsp;", "");
+                    string str = "";
+                    foreach (var child in node.ChildNodes)
+                    {
+                        if (child.Name == "span")
+                        {
+                            var s = child.GetAttributeValue("title", "");
+                            //translate s
+                            for (int i = 0; i < TranslateSpanMap.Length; i += 2)
+                                if (s == TranslateSpanMap[i])
+                                    s = TranslateSpanMap[i + 1];
+                            if (s != null)
+                                str += "[" + s + "]";
+                        }
+                        else
+                        {
+                            str += child.InnerText;
+                        }
+                    }
+                    string s_remove_file = Regex.Replace(str, @"\[\[文件(.*?)(\|.*?)?\]\]", (e) => "").Replace("&nbsp;", "");
                     current.desc = Regex.Replace(s_remove_file, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value);
                 }
             }, (a, b) => { }, () => {
@@ -545,7 +606,25 @@ namespace WikiDictionaryPatcher
                 }
                 if (id == 6)
                 {
-                    string s_remove_file = Regex.Replace(node.InnerText, @"\[\[文件(.*?)(\|.*?)?\]\]", (e) => "").Replace("&nbsp;", "");
+                    string str = "";
+                    foreach (var child in node.ChildNodes)
+                    {
+                        if (child.Name == "span")
+                        {
+                            var s = child.GetAttributeValue("title", "");
+                            //translate s
+                            for (int i = 0; i < TranslateSpanMap.Length; i += 2)
+                                if (s == TranslateSpanMap[i])
+                                    s = TranslateSpanMap[i + 1];
+                            if (s != null)
+                                str += "[" + s + "]";
+                        }
+                        else
+                        {
+                            str += child.InnerText;
+                        }
+                    }
+                    string s_remove_file = Regex.Replace(str, @"\[\[文件(.*?)(\|.*?)?\]\]", (e) => "").Replace("&nbsp;", "");
                     current.desc = Regex.Replace(s_remove_file, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value);
                 }
             }, (a, b) => { }, () => {
@@ -724,7 +803,7 @@ namespace WikiDictionaryPatcher
                     {
                         font.CopyTo(luaName + @"\..\..\wd_font\" + target_name);
                     }
-                    catch (Exception e) { }
+                    catch (Exception) { }
                 }
 
             }
