@@ -815,10 +815,10 @@ namespace WikiDictionaryPatcher
             return new VersionInfo()
             {
                 invalid_last = VERSION,
-                huijiItemUrl = @"https://isaac.huijiwiki.com/api.php?action=expandtemplates&prop=wikitext&format=json&text={{道具查询|条件=[[Type::道具]]}}",
-                huijiTrinketUrl = @"https://isaac.huijiwiki.com/api.php?action=expandtemplates&prop=wikitext&format=json&text={{道具查询|条件=[[Type::饰品]]}}",
-                huijiCardUrl = @"https://isaac.huijiwiki.com/api.php?action=expandtemplates&prop=wikitext&format=json&text={{道具查询|条件=[[Type::卡牌]]}}",
-                huijiPillUrl = @"https://isaac.huijiwiki.com/api.php?action=expandtemplates&prop=wikitext&format=json&text={{道具查询|条件=[[Type::药丸]]}}",
+                huijiItemUrl = @"http://isaac.huijiwiki.com/api.php?action=expandtemplates&prop=wikitext&format=json&text={{道具查询|条件=[[Type::道具]]}}",
+                huijiTrinketUrl = @"http://isaac.huijiwiki.com/api.php?action=expandtemplates&prop=wikitext&format=json&text={{道具查询|条件=[[Type::饰品]]}}",
+                huijiCardUrl = @"http://isaac.huijiwiki.com/api.php?action=expandtemplates&prop=wikitext&format=json&text={{道具查询|条件=[[Type::卡牌]]}}",
+                huijiPillUrl = @"http://isaac.huijiwiki.com/api.php?action=expandtemplates&prop=wikitext&format=json&text={{道具查询|条件=[[Type::药丸]]}}",
                 fandomItemUrl = @"https://bindingofisaacrebirth.fandom.com/api.php?action=expandtemplates&format=json&prop=wikitext&text={{collectible table}}",
                 fandomTrinketUrl = @"https://bindingofisaacrebirth.fandom.com/api.php?action=expandtemplates&format=json&prop=wikitext&text={{trinket table}}",
             };
