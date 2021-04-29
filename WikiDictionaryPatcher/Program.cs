@@ -1,5 +1,6 @@
 ﻿#if DEBUG
-//#define USE_DIRECT_WIKI_ACCESS
+#define USE_DIRECT_WIKI_ACCESS
+#define USE_LOCALHOST_DIRECT_WIKI_ACCESS
 #endif
 
 using HtmlAgilityPack;
@@ -815,14 +816,24 @@ namespace WikiDictionaryPatcher
             return new VersionInfo()
             {
                 invalid_last = VERSION,
+#if USE_LOCALHOST_DIRECT_WIKI_ACCESS
+                huijiItemUrl = @"http://127.0.0.1/huiji_item.json",
+                huijiTrinketUrl = @"http://127.0.0.1/huiji_trinket.json",
+                huijiCardUrl = @"http://127.0.0.1/huiji_card.json",
+                huijiPillUrl = @"http://127.0.0.1/huiji_pill.json",
+                fandomItemUrl = @"http://127.0.0.1/fandom_item.json",
+                fandomTrinketUrl = @"http://127.0.0.1/fandom_trinket.json",
+#else
                 huijiItemUrl = @"http://isaac.huijiwiki.com/api.php?action=expandtemplates&prop=wikitext&format=json&text={{道具查询|条件=[[Type::道具]]}}",
                 huijiTrinketUrl = @"http://isaac.huijiwiki.com/api.php?action=expandtemplates&prop=wikitext&format=json&text={{道具查询|条件=[[Type::饰品]]}}",
                 huijiCardUrl = @"http://isaac.huijiwiki.com/api.php?action=expandtemplates&prop=wikitext&format=json&text={{道具查询|条件=[[Type::卡牌]]}}",
                 huijiPillUrl = @"http://isaac.huijiwiki.com/api.php?action=expandtemplates&prop=wikitext&format=json&text={{道具查询|条件=[[Type::药丸]]}}",
                 fandomItemUrl = @"https://bindingofisaacrebirth.fandom.com/api.php?action=expandtemplates&format=json&prop=wikitext&text={{collectible table}}",
                 fandomTrinketUrl = @"https://bindingofisaacrebirth.fandom.com/api.php?action=expandtemplates&format=json&prop=wikitext&text={{trinket table}}",
+#endif
+
             };
         }
 #endif
-    }
+            }
 }
