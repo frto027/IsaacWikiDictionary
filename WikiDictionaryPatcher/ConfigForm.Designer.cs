@@ -55,12 +55,16 @@
             this.defaultFont = new System.Windows.Forms.RadioButton();
             this.stFont12 = new System.Windows.Forms.RadioButton();
             this.label2 = new System.Windows.Forms.Label();
+            this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.qrCodeNo = new System.Windows.Forms.RadioButton();
+            this.qrCodeYes = new System.Windows.Forms.RadioButton();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox5.SuspendLayout();
             this.groupBox6.SuspendLayout();
+            this.groupBox7.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -366,12 +370,46 @@
             this.label2.TabIndex = 7;
             this.label2.Text = "卡牌/药丸信息暂只支持灰机wiki";
             // 
+            // groupBox7
+            // 
+            this.groupBox7.Controls.Add(this.qrCodeNo);
+            this.groupBox7.Controls.Add(this.qrCodeYes);
+            this.groupBox7.Location = new System.Drawing.Point(289, 232);
+            this.groupBox7.Name = "groupBox7";
+            this.groupBox7.Size = new System.Drawing.Size(271, 55);
+            this.groupBox7.TabIndex = 5;
+            this.groupBox7.TabStop = false;
+            this.groupBox7.Text = "显示道具二维码";
+            // 
+            // qrCodeNo
+            // 
+            this.qrCodeNo.AutoSize = true;
+            this.qrCodeNo.Location = new System.Drawing.Point(145, 20);
+            this.qrCodeNo.Name = "qrCodeNo";
+            this.qrCodeNo.Size = new System.Drawing.Size(35, 16);
+            this.qrCodeNo.TabIndex = 2;
+            this.qrCodeNo.Text = "否";
+            this.qrCodeNo.UseVisualStyleBackColor = true;
+            // 
+            // qrCodeYes
+            // 
+            this.qrCodeYes.AutoSize = true;
+            this.qrCodeYes.Checked = true;
+            this.qrCodeYes.Location = new System.Drawing.Point(18, 20);
+            this.qrCodeYes.Name = "qrCodeYes";
+            this.qrCodeYes.Size = new System.Drawing.Size(35, 16);
+            this.qrCodeYes.TabIndex = 1;
+            this.qrCodeYes.TabStop = true;
+            this.qrCodeYes.Text = "是";
+            this.qrCodeYes.UseVisualStyleBackColor = true;
+            // 
             // ConfigForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(572, 340);
             this.ControlBox = false;
+            this.Controls.Add(this.groupBox7);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.cancelButton);
@@ -396,6 +434,8 @@
             this.groupBox5.PerformLayout();
             this.groupBox6.ResumeLayout(false);
             this.groupBox6.PerformLayout();
+            this.groupBox7.ResumeLayout(false);
+            this.groupBox7.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -430,5 +470,8 @@
         private System.Windows.Forms.RadioButton stFont16;
         private System.Windows.Forms.RadioButton dxFont16;
         private System.Windows.Forms.RadioButton dxFont12;
+        private System.Windows.Forms.GroupBox groupBox7;
+        private System.Windows.Forms.RadioButton qrCodeNo;
+        private System.Windows.Forms.RadioButton qrCodeYes;
     }
 }

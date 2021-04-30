@@ -6,12 +6,14 @@
 using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows.Forms;
 
 namespace WikiDictionaryPatcher
@@ -21,6 +23,7 @@ namespace WikiDictionaryPatcher
         public int id;
         public string name;
         public string desc;
+        public string url;
     }
 
     public class DicOptions
@@ -30,6 +33,7 @@ namespace WikiDictionaryPatcher
         public bool use_player_pos, draw_mouse, use_half_size_font;
         public bool use_bigger_font;
         public bool use_dx_16_font, use_dx_12_font, use_st_16_font, use_st_12_font,use_st_10_font, use_default_font;
+        public bool renderQrCode;
     }
 
     class Program
@@ -45,7 +49,8 @@ namespace WikiDictionaryPatcher
         //this is file version
         private static string[] Versions =
         {
-            "当前版本文件结构发生变化，请使用1.0.14及以前版本对游戏中的图鉴进行卸载","-- WIKIDIC_VERSION_1 --" //,"请使用xxx版本卸载","__LATEST_VERSION__"
+            "当前版本文件结构发生变化，请使用1.0.14及以前版本对游戏中的图鉴进行卸载","-- WIKIDIC_VERSION_1 --", //,"请使用xxx版本卸载","__LATEST_VERSION__"
+            "当前版本文件结构发生变化，请下载并使用1.0.22版本的图鉴程序对游戏中的图鉴进行卸载","-- WIKIDIC_VERSION_2 --",
         };
 
         private static string[] TranslateSpanMap = new string[]
@@ -58,11 +63,11 @@ namespace WikiDictionaryPatcher
 #if DEBUG
         private static string
             RES_MAIN_LUA_PATCH = @"..\..\..\patch.lua",
-            RES_FONT_FOLDER_PATCH = @"..\..\..\wd_font";
+            RES_FOLDER_PATCH = @"..\..\..\wd_res";
 #else
         private static string
             RES_MAIN_LUA_PATCH = @"patch.lua",
-            RES_FONT_FOLDER_PATCH = "wd_font";
+            RES_FOLDER_PATCH = "wd_res";
 #endif
         //this is network version, instead of file version
         private static int VERSION = 2;
@@ -275,7 +280,7 @@ namespace WikiDictionaryPatcher
                 d = d.Replace("\\", "\\\\").Replace("\n", "\\n").Replace("\"", "\\\"");
                 pill_desc += string.Format("[{0}]=\"{1}\",\n", item.Value.id, d);
             }
-            AddPatch(lua_path, desc_dict, trinket_desc,card_desc,pill_desc, options);
+            AddPatch(lua_path, desc_dict, trinket_desc,card_desc,pill_desc,descs.Values, trinket_descs.Values, options);
             MessageBox.Show("操作完成");
         }
 
@@ -463,7 +468,10 @@ namespace WikiDictionaryPatcher
             DownloadItemDesc(version.huijiItemUrl,()=> { current = new ItemDesc(); }, (id, node) => {
                 if(id == 0)
                 {
-                    current.name = Regex.Replace(node.LastChild.InnerText, @"\[\[(.*?)(\|.*?)?\]\]", (e) => e.Groups[1].Value);
+                    current.name = Regex.Replace(node.LastChild.InnerText, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => {
+                        current.url = GetHuijiWikiUrl(e.Groups[1].Value);
+                        return e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value;
+                    });
                 }
                 if(id == 2)
                 {
@@ -509,7 +517,10 @@ namespace WikiDictionaryPatcher
             DownloadItemDesc(version.huijiTrinketUrl, () => { current = new ItemDesc(); }, (id, node) => {
                 if (id == 0)
                 {
-                    current.name = Regex.Replace(node.LastChild.InnerText, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value);
+                    current.name = Regex.Replace(node.LastChild.InnerText, @"\[\[(.*?)(\|(.*?))?\]\]", (e) => {
+                        current.url = GetHuijiWikiUrl(e.Groups[1].Value);
+                        return e.Groups[3].Value == "" ? e.Groups[1].Value : e.Groups[3].Value;
+                    });
                 }
                 if (id == 2)
                 {
@@ -680,26 +691,19 @@ namespace WikiDictionaryPatcher
                     writer.Write(next);
                 }
             }
-            //delete fonts
-            var dirInfo = new DirectoryInfo(fileName + @"\..\..\wd_font");
-            if(dirInfo.Exists)
+
+            //delete wd_resource
             {
-                foreach(var file in dirInfo.GetFiles())
+                string res_folder = fileName + @"\..\..\wd_res\";
+                var res_dir = new DirectoryInfo(res_folder);
+                if (res_dir.Exists)
                 {
-                    if(new FileInfo(RES_FONT_FOLDER_PATCH + "\\" + file.Name).Exists)
-                    {
-                        file.Delete();
-                    }
+                    res_dir.Delete(true);
                 }
             }
-            try
-            {
-                dirInfo.Delete();
-            }
-            catch (IOException) { }
         }
 
-        private static void AddPatch(string luaName, string item_desc, string trinket_desc,string card_desc, string pill_desc, DicOptions dicOptions)
+        private static void AddPatch(string luaName, string item_desc, string trinket_desc,string card_desc, string pill_desc, IEnumerable<ItemDesc> itemDescs,IEnumerable<ItemDesc> trinketDescs, DicOptions dicOptions)
         {
             string next = "";
             bool isPatching = false;
@@ -746,6 +750,7 @@ namespace WikiDictionaryPatcher
                             patch += "WikiDic.useDefaultFont = " + (dicOptions.use_default_font ? "true" : "false") + "\n";
                             patch += "WikiDic.useHalfSizeFont = " + (dicOptions.use_half_size_font ? "true" : "false") + "\n";
                             patch += "WikiDic.useBiggerSizeFont = " + (dicOptions.use_bigger_font ? "true" : "false") + "\n";
+                            patch += "WikiDic.renderQrcode = " + (dicOptions.renderQrCode ? "true" : "false") + "\n";
                         }
                         else if (line == FAKE_TRINKET_DESC_CONTENT)
                         {
@@ -776,6 +781,20 @@ namespace WikiDictionaryPatcher
                     writer.Write(next);
                 }
             }
+
+            //create resource folder
+            string res_folder = luaName + @"\..\..\wd_res\";
+            {
+                var res_dir = new DirectoryInfo(res_folder);
+                if (res_dir.Exists)
+                {
+                    res_dir.Delete(true);
+                }
+                res_dir.Create();
+            }
+
+            string fnt_folder = res_folder + @"font\";
+
             //patch font
             if (!dicOptions.use_default_font)
             {
@@ -791,8 +810,8 @@ namespace WikiDictionaryPatcher
                 else if (dicOptions.use_dx_12_font)
                     fntName = "dx12_wdic";
                 //copy font
-                Directory.CreateDirectory(luaName + @"\..\..\wd_font");
-                var fontDir = new DirectoryInfo(RES_FONT_FOLDER_PATCH);
+                Directory.CreateDirectory(fnt_folder);
+                var fontDir = new DirectoryInfo(RES_FOLDER_PATCH + @"\font");
                 foreach (FileInfo font in fontDir.GetFiles())
                 {
                     if (!font.Name.StartsWith(fntName))
@@ -802,12 +821,78 @@ namespace WikiDictionaryPatcher
                         target_name = "wdic_font.fnt";
                     try
                     {
-                        font.CopyTo(luaName + @"\..\..\wd_font\" + target_name);
+                        font.CopyTo(fnt_folder + target_name);
                     }
                     catch (Exception) { }
                 }
-
             }
+
+            //patch qrcode
+            if(dicOptions.renderQrCode)
+            {
+                var qrencoder = new Gma.QrCodeNet.Encoding.QrEncoder(Gma.QrCodeNet.Encoding.ErrorCorrectionLevel.L);
+                //create qrcode folder
+                string qrcodeFolder = res_folder + @"qrcode\";
+                new DirectoryInfo(qrcodeFolder).Create();
+
+                //patch item dir
+                Console.WriteLine("正在生成道具的二维码图片...");
+                foreach (var item in itemDescs)
+                {
+                    if(item.url != null && item.url.Length > 0)
+                    {
+                        SaveQrCode(qrcodeFolder + "item_" + item.id + ".png", qrencoder.Encode(item.url));
+                    }
+                    //有什么进度条比这个还简单的吗？
+                    Console.Write(".");
+                }
+                Console.WriteLine("完成");
+
+                Console.WriteLine("正在生成饰品的二维码图片...");
+                foreach (var item in trinketDescs)
+                {
+                    if (item.url != null && item.url.Length > 0)
+                    {
+                        SaveQrCode(qrcodeFolder + "trinket_" + item.id + ".png", qrencoder.Encode(item.url));
+                    }
+                    //有什么进度条比这个还简单的吗？
+                    Console.Write(".");
+                }
+                Console.WriteLine("完成");
+
+                //patch qrcode anim
+                new FileInfo(RES_FOLDER_PATCH + @"\qrcode\qrcode.anm2").CopyTo(qrcodeFolder + "qrcode.anm2");
+            }
+        }
+
+        private static void SaveQrCode(string path, Gma.QrCodeNet.Encoding.QrCode qrCode)
+        {
+            const int pixelWidth = 1;
+            var mat = qrCode.Matrix;
+            Bitmap bitmap = new Bitmap(mat.Width * pixelWidth + 2, mat.Height * pixelWidth + 2);
+            for (int i = 0; i < bitmap.Width; i++)
+            {
+                for (int j = 0; j < bitmap.Height; j++)
+                {
+                    if (i == 0 || j == 0 || i == bitmap.Width - 1 || j == bitmap.Height - 1)
+                    {
+                        //white border
+                        bitmap.SetPixel(i, j, Color.White);
+                    }
+                    else
+                    {
+                        //qrcode content
+                        bitmap.SetPixel(i, j, mat[(i - 1) / pixelWidth, (j - 1) / pixelWidth] ? Color.Black : Color.White);
+                    }
+                }
+            }
+            bitmap.Save(path);
+
+        }
+
+        private static string GetHuijiWikiUrl(string name)
+        {
+            return "http://isaac.huijiwiki.com/wiki/" + HttpUtility.UrlPathEncode(name) + "?IsaacWikiDicVersion=" + VERSION;
         }
 
 #if DEBUG

@@ -19,9 +19,14 @@ WikiDic.taintQQQOffset = Vector(0,15)
 WikiDic.authRemains = 60*9
 WikiDic.lineDistance = 0
 WikiDic.authTexts = {}
+WikiDic.qrcodeToggle = false
+WikiDic.qrcodeToggleCounter = 0
+WikiDic.qrcodeToggleCounterInit = 30
+WikiDic.qrCodeOffset = Vector(10,0)
 
+WikiDic.huijiTQrCodeInfo = "双击Tab键（地图键）开关二维码显示"
 WikiDic.huijiWikiInfo = {
-	"提示：按住Tab键显示手上持有的卡牌/药丸/符文信息",
+	"按住Tab键（地图键）显示手上持有的卡牌/药丸/符文信息",
 	"中文图鉴信息来源：灰机wiki",
 	"https://isaac.huijiwiki.com/wiki",
 }
@@ -41,6 +46,8 @@ WikiDic.nullVector = Vector(0,0)
 --WikiDic.useDefaultFont = true
 --WikiDic.useHalfSizeFont = true
 --WikiDic.useBiggerSizeFont = true
+--WikiDic.renderQrcode = true --renderQrcode == 1 >> [double click tab] >> WikiDic.qrcodeToggle >> contains_qrcode
+
 
 if WikiDic.usePlayerPos then
 	WikiDic.tDistance = 180
@@ -68,6 +75,10 @@ if WikiDic.useBiggerSizeFont then
 	WikiDic.lineDistance = 3
 end
 if WikiDic.useHuijiWiki then
+	if WikiDic.renderQrcode then
+		table.insert(WikiDic.authTexts, WikiDic.huijiTQrCodeInfo)
+	end
+
 	for _,text in pairs(WikiDic.huijiWikiInfo) do
 		table.insert(WikiDic.authTexts,text)
 	end
@@ -190,11 +201,16 @@ end
 function WikiDic:InitFonts()
 	if WikiDic.font == nil then
 		WikiDic.font = Font()
-		WikiDic.font:Load(WikiDic.useDefaultFont and "font/terminus.fnt" or "wd_font/wdic_font.fnt")
+		WikiDic.font:Load(WikiDic.useDefaultFont and "font/terminus.fnt" or "wd_res/font/wdic_font.fnt")
 		WikiDic:FixReturn(WikiDic.desc)
 		WikiDic:FixReturn(WikiDic.trinketDesc)
 		WikiDic:FixReturn(WikiDic.cardDesc)
 		WikiDic:FixReturn(WikiDic.pillDesc)
+		if WikiDic.renderQrcode then
+			WikiDic.qrcodeSprite = Sprite()
+			WikiDic.qrcodeSprite:Load("wd_res/qrcode/qrcode.anm2",true)
+			WikiDic.qrcodeSprite:SetFrame("show",1)
+		end
 	end
 end
 
@@ -257,6 +273,19 @@ function WikiDic:RenderCallback()
 		return
 	end
 
+	local contains_qrcode = false
+	--toggle qrcode
+	local map_btn_pressed = Input.IsActionTriggered(ButtonAction.ACTION_MAP,Isaac.GetPlayer(0).ControllerIndex)
+	if WikiDic.qrcodeToggleCounter > 0 then
+		WikiDic.qrcodeToggleCounter = WikiDic.qrcodeToggleCounter - 1
+		if map_btn_pressed then
+			WikiDic.qrcodeToggleCounter = 0
+			WikiDic.qrcodeToggle = not WikiDic.qrcodeToggle
+		end
+	elseif WikiDic.renderQrcode and map_btn_pressed then
+		WikiDic.qrcodeToggleCounter = WikiDic.qrcodeToggleCounterInit
+	end
+
 
 	if WikiDic.drawMouse then
 		if WikiDic.cursur_sprite == nil then
@@ -310,6 +339,17 @@ function WikiDic:RenderCallback()
 				sprite.Scale = WikiDic.iconScale
 				sprite:RenderLayer(1,next_line + icon_offset,WikiDic.nullVector,WikiDic.nullVector)
 				sprite.Scale = oldScale
+
+				--replace qrcode sprite
+				if WikiDic.qrcodeToggle then
+					contains_qrcode = true
+					local target_graph = "wd_res/qrcode/item_" .. tostring(entity_id) .. ".png"
+					if WikiDic.qrcodeGraph ~= target_graph then
+						WikiDic.qrcodeSprite:ReplaceSpritesheet(0,target_graph)
+						WikiDic.qrcodeSprite:LoadGraphics()
+						WikiDic.qrcodeGraph = target_graph
+					end
+ 				end
 			end
 			if WikiDic.targetEntity.Variant == 350 then
 				local trinket_id = WikiDic.targetEntity.SubType
@@ -321,7 +361,11 @@ function WikiDic:RenderCallback()
 				--setup desc
 				desc = WikiDic.trinketDesc[trinket_id] or (tostring(trinket_id) .. "号饰品\n\n没有收录")
 				if is_gold then
-					desc = "(金色的)" .. desc 
+					if useHuijiWiki then
+						desc = "(金色的)" .. desc 
+					else
+						desc = "golden " .. desc
+					end
 				end
 				--draw icon
 				local icon_offset = WikiDic.trinketIconOffset
@@ -330,6 +374,17 @@ function WikiDic:RenderCallback()
 				sprite.Scale = WikiDic.iconScale
 				sprite:RenderLayer(0,next_line + icon_offset,WikiDic.nullVector,WikiDic.nullVector)
 				sprite.Scale = oldScale
+
+				--replace qrcode sprite
+				if WikiDic.qrcodeToggle then
+					contains_qrcode = true
+					local target_graph = "wd_res/qrcode/trinket_" .. tostring(trinket_id) .. ".png"
+					if WikiDic.qrcodeGraph ~= target_graph then
+						WikiDic.qrcodeSprite:ReplaceSpritesheet(0,target_graph)
+						WikiDic.qrcodeSprite:LoadGraphics()
+						WikiDic.qrcodeGraph = target_graph
+					end
+				end
 			end
 		end
 
@@ -340,6 +395,10 @@ function WikiDic:RenderCallback()
 			next_line = next_line + Vector(0,WikiDic.font:GetLineHeight()*WikiDic.fontScale + WikiDic.lineDistance)
 			last = next
 		until last == nil
+		--draw qrcode
+		if contains_qrcode then
+			WikiDic.qrcodeSprite:RenderLayer(0,next_line + WikiDic.qrCodeOffset,WikiDic.nullVector,WikiDic.nullVector)
+		end
 		-- WikiDic.font:DrawStringUTF8 (desc,rpos.X,rpos.Y,KColor(1,1,1,1,0,0,0),0,true)
 	end
 end

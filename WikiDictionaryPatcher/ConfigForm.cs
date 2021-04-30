@@ -51,6 +51,7 @@ namespace WikiDictionaryPatcher
             options.use_dx_16_font = dxFont16.Checked;
             options.use_dx_12_font = dxFont12.Checked;
             options.use_default_font = defaultFont.Checked;
+            options.renderQrCode = qrCodeYes.Checked;
             Close();
         }
 
