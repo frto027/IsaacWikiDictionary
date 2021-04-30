@@ -23,6 +23,7 @@ WikiDic.qrcodeToggle = false
 WikiDic.qrcodeToggleCounter = 0
 WikiDic.qrcodeToggleCounterInit = 30
 WikiDic.qrCodeOffset = Vector(10,0)
+WikiDic.questionMarkSprite = nil
 
 WikiDic.huijiTQrCodeInfo = "双击Tab键（地图键）开关二维码显示"
 WikiDic.huijiWikiInfo = {
@@ -107,6 +108,57 @@ WikiDic.pillDesc = {
 -- FAKE_PILL_CONTENT --
 }
 
+function WikiDic:SpriteIsQuestionmark(entitySprite, questionSprite)
+	if not entitySprite:IsPlaying("Idle") then
+		return false
+	end
+
+	questionSprite:SetFrame("Idle",entitySprite:GetFrame())
+	-- check some point, if returns false, it is not same with question mark
+	for i = -70,0,2 do
+		local qcolor = questionSprite:GetTexel(Vector(0,i),WikiDic.nullVector,1,1)
+		local ecolor = entitySprite:GetTexel(Vector(0,i),WikiDic.nullVector,1,1)
+		if qcolor.Red ~= ecolor.Red or qcolor.Green ~= ecolor.Green or qcolor.Blue ~= ecolor.Blue then
+			return false
+		end
+	end
+
+	--this may be a question mark, however, we will check it again to ensure it
+	for j = -3,3,2 do
+		for i = -71,0,2 do
+			local qcolor = questionSprite:GetTexel(Vector(j,i),WikiDic.nullVector,1,1)
+			local ecolor = entitySprite:GetTexel(Vector(j,i),WikiDic.nullVector,1,1)
+			if qcolor.Red ~= ecolor.Red or qcolor.Green ~= ecolor.Green or qcolor.Blue ~= ecolor.Blue then
+				return false
+			end
+		end
+	end
+
+
+	return true
+end
+
+function WikiDic:IsQuestionMarkTexture(entity)
+	-- use data buffer
+	local data = entity:GetData()
+	local mark = data["WikiDicQuestionMarkStatus"]
+	if mark then
+		return mark
+	end
+
+	local questionSprite = WikiDic.questionMarkSprite
+	local entitySprite = entity:GetSprite()
+
+	if not questionSprite then
+		-- we dont show anything before the font init
+		return true
+	end
+
+	mark = WikiDic:SpriteIsQuestionmark(entitySprite,questionSprite)
+	data["WikiDicQuestionMarkStatus"] = mark
+	return mark
+end
+
 function WikiDic:Update()
 	WikiDic.targetEntity = nil
 	-- if (Game():GetLevel():GetCurses() & LevelCurse.CURSE_OF_BLIND) ~= 0 then
@@ -116,7 +168,7 @@ function WikiDic:Update()
 	local tpos = WikiDic.usePlayerPos and Isaac.GetPlayer(0).Position or Input.GetMousePosition(true)
 	for _,e in pairs(Isaac.GetRoomEntities()) do
 		if e.Type == 5 and (e.Variant == 100 or e.Variant == 350) then
-			if e.Variant == 100 and (e.SubType == 0 or (Game():GetLevel():GetCurses() & LevelCurse.CURSE_OF_BLIND) ~= 0) then
+			if e.Variant == 100 and (e.SubType == 0 or (Game():GetLevel():GetCurses() & LevelCurse.CURSE_OF_BLIND) ~= 0 or WikiDic:IsQuestionMarkTexture(e)) then
 				-- do nothing in CURSE_OF_BLIND
 			else
 				local distVec = (e.Position + WikiDic.offsetCenter - tpos)
@@ -211,6 +263,11 @@ function WikiDic:InitFonts()
 			WikiDic.qrcodeSprite:Load("wd_res/qrcode/qrcode.anm2",true)
 			WikiDic.qrcodeSprite:SetFrame("show",1)
 		end
+
+		WikiDic.questionMarkSprite = Sprite()
+		WikiDic.questionMarkSprite:Load("gfx/005.100_collectible.anm2",true)
+		WikiDic.questionMarkSprite:ReplaceSpritesheet(1,"gfx/items/collectibles/questionmark.png")
+		WikiDic.questionMarkSprite:LoadGraphics()
 	end
 end
 
