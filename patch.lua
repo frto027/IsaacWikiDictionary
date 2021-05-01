@@ -421,7 +421,7 @@ function WikiDic:RenderCallback()
 					if useHuijiWiki then
 						desc = "(金色的)" .. desc 
 					else
-						desc = "golden " .. desc
+						desc = "(Golden) " .. desc
 					end
 				end
 				--draw icon
