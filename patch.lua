@@ -142,7 +142,7 @@ function WikiDic:IsQuestionMarkTexture(entity)
 	-- use data buffer
 	local data = entity:GetData()
 	local mark = data["WikiDicQuestionMarkStatus"]
-	if mark then
+	if mark ~= nil then
 		return mark
 	end
 
