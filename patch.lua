@@ -418,7 +418,7 @@ function WikiDic:RenderCallback()
 				--setup desc
 				desc = WikiDic.trinketDesc[trinket_id] or (tostring(trinket_id) .. "号饰品\n\n没有收录")
 				if is_gold then
-					if useHuijiWiki then
+					if WikiDic.useHuijiWiki then
 						desc = "(金色的)" .. desc 
 					else
 						desc = "(Golden) " .. desc
