@@ -1,5 +1,5 @@
 ﻿#if DEBUG
-#define USE_DIRECT_WIKI_ACCESS
+//#define USE_DIRECT_WIKI_ACCESS
 #define USE_LOCALHOST_DIRECT_WIKI_ACCESS
 #endif
 
@@ -892,7 +892,7 @@ namespace WikiDictionaryPatcher
 
         private static string GetHuijiWikiUrl(string name)
         {
-            return "http://isaac.huijiwiki.com/wiki/" + HttpUtility.UrlPathEncode(name) + "?IsaacWikiDicVersion=" + VERSION;
+            return version.huijiUrlPrefix + HttpUtility.UrlPathEncode(name) + "?IsaacWikiDicVersion=" + VERSION;
         }
 
 #if DEBUG
@@ -901,6 +901,7 @@ namespace WikiDictionaryPatcher
             return new VersionInfo()
             {
                 invalid_last = VERSION,
+                huijiUrlPrefix = "http://isaac.huijiwiki.com/wiki/",
 #if USE_LOCALHOST_DIRECT_WIKI_ACCESS
                 huijiItemUrl = @"http://127.0.0.1/huiji_item.json",
                 huijiTrinketUrl = @"http://127.0.0.1/huiji_trinket.json",
@@ -920,5 +921,5 @@ namespace WikiDictionaryPatcher
             };
         }
 #endif
-            }
+    }
 }

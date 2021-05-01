@@ -108,7 +108,7 @@
   <PropertyGroup>
     <PostBuildEvent>copy ..\..\..\patch.lua patch.lua
 
-echo d|xcopy ..\..\..\wd_res wd_res</PostBuildEvent>
+echo d|xcopy /e ..\..\..\wd_res wd_res</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>rmdir /S /Q wd_res
