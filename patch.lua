@@ -262,6 +262,8 @@ function WikiDic:InitFonts()
 			WikiDic.qrcodeSprite = Sprite()
 			WikiDic.qrcodeSprite:Load("wd_res/qrcode/qrcode.anm2",true)
 			WikiDic.qrcodeSprite:SetFrame("show",1)
+			WikiDic.qrcodeSprite.Color = Color(1,1,1,WikiDic.qrTransparent,0,0,0)
+			WikiDic.qrCodeIsTransparent = true
 		end
 
 		WikiDic.questionMarkSprite = Sprite()
@@ -297,20 +299,22 @@ end
 function WikiDic:RenderCallback()
 	WikiDic:InitFonts()
 
+	local map_btn_pressed = Input.IsActionPressed(ButtonAction.ACTION_MAP,Isaac.GetPlayer(0).ControllerIndex)
+
 	local is_Jacob_and_Esau = Isaac.GetPlayer(0).SubType == 19 and Isaac.GetPlayer(1).SubType == 20
 	local player_index = is_Jacob_and_Esau and Input.IsActionPressed(ButtonAction.ACTION_DROP,Isaac.GetPlayer(0).ControllerIndex) and 1 or 0
 	
 	local itemPool = Game():GetItemPool()
 	local pill_color = Isaac.GetPlayer(player_index):GetPill(0)
-	local card_hold = WikiDic.useHuijiWiki and Input.IsActionPressed(ButtonAction.ACTION_MAP,Isaac.GetPlayer(0).ControllerIndex) and Isaac.GetPlayer(player_index):GetCard(0) or 0
-	local pill_hold = WikiDic.useHuijiWiki and Input.IsActionPressed(ButtonAction.ACTION_MAP,Isaac.GetPlayer(0).ControllerIndex) and itemPool:IsPillIdentified(pill_color) and itemPool:GetPillEffect(pill_color) or -1
+	local card_hold = WikiDic.useHuijiWiki and map_btn_pressed and Isaac.GetPlayer(player_index):GetCard(0) or 0
+	local pill_hold = WikiDic.useHuijiWiki and map_btn_pressed and itemPool:IsPillIdentified(pill_color) and itemPool:GetPillEffect(pill_color) or -1
 	if pill_hold == 31 then
 		-- ??? pill
 		pill_hold = -1
 	end
 	-- draw auth infos here
 	if WikiDic.authRemains > 0 then
-		if WikiDic.targetEntity ~= nil or Input.IsActionPressed(ButtonAction.ACTION_MAP,Isaac.GetPlayer(0).ControllerIndex) then
+		if WikiDic.targetEntity ~= nil or map_btn_pressed then
 			WikiDic.authRemains = 0
 		end
 
@@ -332,14 +336,14 @@ function WikiDic:RenderCallback()
 
 	local contains_qrcode = false
 	--toggle qrcode
-	local map_btn_pressed = Input.IsActionTriggered(ButtonAction.ACTION_MAP,Isaac.GetPlayer(0).ControllerIndex)
+	local map_btn_triggered = Input.IsActionTriggered(ButtonAction.ACTION_MAP,Isaac.GetPlayer(0).ControllerIndex)
 	if WikiDic.qrcodeToggleCounter > 0 then
 		WikiDic.qrcodeToggleCounter = WikiDic.qrcodeToggleCounter - 1
-		if map_btn_pressed then
+		if map_btn_triggered then
 			WikiDic.qrcodeToggleCounter = 0
 			WikiDic.qrcodeToggle = not WikiDic.qrcodeToggle
 		end
-	elseif WikiDic.renderQrcode and map_btn_pressed then
+	elseif WikiDic.renderQrcode and map_btn_triggered then
 		WikiDic.qrcodeToggleCounter = WikiDic.qrcodeToggleCounterInit
 	end
 
@@ -448,12 +452,23 @@ function WikiDic:RenderCallback()
 		--draw text
 		repeat
 			local next = string.find(desc,"\n",last+1)
-			WikiDic.font:DrawStringScaledUTF8(string.sub(desc,last+1,(string.sub(desc,next or #desc,next) == '\n') and (next or #desc) - 1 or next),next_line.X,next_line.Y,WikiDic.fontScale,WikiDic.fontScale,KColor(1,1,1,0.6,0,0,0),0,true)
+			WikiDic.font:DrawStringScaledUTF8(string.sub(desc,last+1,(string.sub(desc,next or #desc,next) == '\n') and (next or #desc) - 1 or next),next_line.X,next_line.Y,WikiDic.fontScale,WikiDic.fontScale,KColor(1,1,1,WikiDic.textTransparent,0,0,0),0,true)
 			next_line = next_line + Vector(0,WikiDic.font:GetLineHeight()*WikiDic.fontScale + WikiDic.lineDistance)
 			last = next
 		until last == nil
 		--draw qrcode
 		if contains_qrcode then
+			-- toggle transparent
+			if WikiDic.qrcodeToggleCounter == 0 and map_btn_pressed == WikiDic.qrCodeIsTransparent then
+				if map_btn_pressed then
+					WikiDic.qrcodeSprite.Color = Color(1,1,1,1,0,0,0)
+					WikiDic.qrCodeIsTransparent = false
+				else
+					WikiDic.qrcodeSprite.Color = Color(1,1,1,WikiDic.qrTransparent,0,0,0)
+					WikiDic.qrCodeIsTransparent = true
+				end
+			end
+
 			WikiDic.qrcodeSprite:RenderLayer(0,next_line + WikiDic.qrCodeOffset,WikiDic.nullVector,WikiDic.nullVector)
 		end
 		-- WikiDic.font:DrawStringUTF8 (desc,rpos.X,rpos.Y,KColor(1,1,1,1,0,0,0),0,true)

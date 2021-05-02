@@ -34,6 +34,8 @@ namespace WikiDictionaryPatcher
         public bool use_bigger_font;
         public bool use_dx_16_font, use_dx_12_font, use_st_16_font, use_st_12_font,use_st_10_font, use_default_font;
         public bool renderQrCode;
+
+        public string textTransparent, qrTransparent;
     }
 
     class Program
@@ -751,6 +753,8 @@ namespace WikiDictionaryPatcher
                             patch += "WikiDic.useHalfSizeFont = " + (dicOptions.use_half_size_font ? "true" : "false") + "\n";
                             patch += "WikiDic.useBiggerSizeFont = " + (dicOptions.use_bigger_font ? "true" : "false") + "\n";
                             patch += "WikiDic.renderQrcode = " + (dicOptions.renderQrCode ? "true" : "false") + "\n";
+                            patch += "WikiDic.textTransparent = " + dicOptions.textTransparent + "\n";
+                            patch += "WikiDic.qrTransparent = " + dicOptions.qrTransparent + "\n";
                         }
                         else if (line == FAKE_TRINKET_DESC_CONTENT)
                         {

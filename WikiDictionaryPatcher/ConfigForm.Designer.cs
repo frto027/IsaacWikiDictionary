@@ -58,6 +58,13 @@
             this.groupBox7 = new System.Windows.Forms.GroupBox();
             this.qrCodeNo = new System.Windows.Forms.RadioButton();
             this.qrCodeYes = new System.Windows.Forms.RadioButton();
+            this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.textTransparentBar = new System.Windows.Forms.TrackBar();
+            this.textTransparentLabel = new System.Windows.Forms.Label();
+            this.groupBox9 = new System.Windows.Forms.GroupBox();
+            this.qrTransparentLabel = new System.Windows.Forms.Label();
+            this.qrTransparentBar = new System.Windows.Forms.TrackBar();
+            this.button1 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -65,6 +72,10 @@
             this.groupBox5.SuspendLayout();
             this.groupBox6.SuspendLayout();
             this.groupBox7.SuspendLayout();
+            this.groupBox8.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.textTransparentBar)).BeginInit();
+            this.groupBox9.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.qrTransparentBar)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -262,7 +273,7 @@
             // 
             // yseButton
             // 
-            this.yseButton.Location = new System.Drawing.Point(201, 307);
+            this.yseButton.Location = new System.Drawing.Point(208, 390);
             this.yseButton.Name = "yseButton";
             this.yseButton.Size = new System.Drawing.Size(75, 23);
             this.yseButton.TabIndex = 5;
@@ -272,7 +283,7 @@
             // 
             // cancelButton
             // 
-            this.cancelButton.Location = new System.Drawing.Point(282, 307);
+            this.cancelButton.Location = new System.Drawing.Point(289, 390);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
             this.cancelButton.TabIndex = 6;
@@ -403,12 +414,88 @@
             this.qrCodeYes.Text = "是";
             this.qrCodeYes.UseVisualStyleBackColor = true;
             // 
+            // groupBox8
+            // 
+            this.groupBox8.Controls.Add(this.textTransparentLabel);
+            this.groupBox8.Controls.Add(this.textTransparentBar);
+            this.groupBox8.Location = new System.Drawing.Point(12, 293);
+            this.groupBox8.Name = "groupBox8";
+            this.groupBox8.Size = new System.Drawing.Size(271, 71);
+            this.groupBox8.TabIndex = 8;
+            this.groupBox8.TabStop = false;
+            this.groupBox8.Text = " 文字透明度(0%为全透明)";
+            // 
+            // textTransparentBar
+            // 
+            this.textTransparentBar.Location = new System.Drawing.Point(7, 20);
+            this.textTransparentBar.Maximum = 20;
+            this.textTransparentBar.Name = "textTransparentBar";
+            this.textTransparentBar.Size = new System.Drawing.Size(221, 45);
+            this.textTransparentBar.TabIndex = 0;
+            this.textTransparentBar.TickStyle = System.Windows.Forms.TickStyle.Both;
+            this.textTransparentBar.Value = 12;
+            this.textTransparentBar.Scroll += new System.EventHandler(this.trackBar1_Scroll);
+            // 
+            // textTransparentLabel
+            // 
+            this.textTransparentLabel.AutoSize = true;
+            this.textTransparentLabel.Location = new System.Drawing.Point(234, 36);
+            this.textTransparentLabel.Name = "textTransparentLabel";
+            this.textTransparentLabel.Size = new System.Drawing.Size(23, 12);
+            this.textTransparentLabel.TabIndex = 1;
+            this.textTransparentLabel.Text = "60%";
+            this.textTransparentLabel.Click += new System.EventHandler(this.textTransparentLabel_Click);
+            // 
+            // groupBox9
+            // 
+            this.groupBox9.Controls.Add(this.qrTransparentLabel);
+            this.groupBox9.Controls.Add(this.qrTransparentBar);
+            this.groupBox9.Location = new System.Drawing.Point(289, 293);
+            this.groupBox9.Name = "groupBox9";
+            this.groupBox9.Size = new System.Drawing.Size(271, 71);
+            this.groupBox9.TabIndex = 9;
+            this.groupBox9.TabStop = false;
+            this.groupBox9.Text = "二维码透明度(影响识别率，0%为全透明)";
+            // 
+            // qrTransparentLabel
+            // 
+            this.qrTransparentLabel.AutoSize = true;
+            this.qrTransparentLabel.Location = new System.Drawing.Point(234, 36);
+            this.qrTransparentLabel.Name = "qrTransparentLabel";
+            this.qrTransparentLabel.Size = new System.Drawing.Size(29, 12);
+            this.qrTransparentLabel.TabIndex = 1;
+            this.qrTransparentLabel.Text = "100%";
+            // 
+            // qrTransparentBar
+            // 
+            this.qrTransparentBar.Location = new System.Drawing.Point(7, 20);
+            this.qrTransparentBar.Maximum = 20;
+            this.qrTransparentBar.Name = "qrTransparentBar";
+            this.qrTransparentBar.Size = new System.Drawing.Size(221, 45);
+            this.qrTransparentBar.TabIndex = 0;
+            this.qrTransparentBar.TickStyle = System.Windows.Forms.TickStyle.Both;
+            this.qrTransparentBar.Value = 20;
+            this.qrTransparentBar.Scroll += new System.EventHandler(this.qrTransparentBar_Scroll);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(434, 390);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(126, 23);
+            this.button1.TabIndex = 10;
+            this.button1.Text = "游戏内操作说明";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // ConfigForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(572, 340);
+            this.ClientSize = new System.Drawing.Size(576, 425);
             this.ControlBox = false;
+            this.Controls.Add(this.button1);
+            this.Controls.Add(this.groupBox9);
+            this.Controls.Add(this.groupBox8);
             this.Controls.Add(this.groupBox7);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.groupBox6);
@@ -436,6 +523,12 @@
             this.groupBox6.PerformLayout();
             this.groupBox7.ResumeLayout(false);
             this.groupBox7.PerformLayout();
+            this.groupBox8.ResumeLayout(false);
+            this.groupBox8.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.textTransparentBar)).EndInit();
+            this.groupBox9.ResumeLayout(false);
+            this.groupBox9.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.qrTransparentBar)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -473,5 +566,12 @@
         private System.Windows.Forms.GroupBox groupBox7;
         private System.Windows.Forms.RadioButton qrCodeNo;
         private System.Windows.Forms.RadioButton qrCodeYes;
+        private System.Windows.Forms.GroupBox groupBox8;
+        private System.Windows.Forms.TrackBar textTransparentBar;
+        private System.Windows.Forms.Label textTransparentLabel;
+        private System.Windows.Forms.GroupBox groupBox9;
+        private System.Windows.Forms.Label qrTransparentLabel;
+        private System.Windows.Forms.TrackBar qrTransparentBar;
+        private System.Windows.Forms.Button button1;
     }
 }

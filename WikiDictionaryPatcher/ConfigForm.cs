@@ -52,6 +52,16 @@ namespace WikiDictionaryPatcher
             options.use_dx_12_font = dxFont12.Checked;
             options.use_default_font = defaultFont.Checked;
             options.renderQrCode = qrCodeYes.Checked;
+
+            {
+                int p = textTransparentBar.Value * 100 / textTransparentBar.Maximum;
+                options.textTransparent = p + "/100";
+            }
+            {
+                int p = qrTransparentBar.Value * 100 / qrTransparentBar.Maximum;
+                options.qrTransparent = p + "/100";
+            }
+
             Close();
         }
 
@@ -93,6 +103,34 @@ namespace WikiDictionaryPatcher
         private void radioButton1_CheckedChanged_1(object sender, EventArgs e)
         {
 
+        }
+
+        private void trackBar1_Scroll(object sender, EventArgs e)
+        {
+            int prog = textTransparentBar.Value * 100 / textTransparentBar.Maximum;
+            textTransparentLabel.Text = prog + "%";
+        }
+
+        private void textTransparentLabel_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void qrTransparentBar_Scroll(object sender, EventArgs e)
+        {
+            int prog = qrTransparentBar.Value * 100 / qrTransparentBar.Maximum;
+            qrTransparentLabel.Text = prog + "%";
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(
+                "游戏内使用键盘Tab键进行操作，同时也支持手柄对应按键进行操作\n"+
+                "点击Tab键\t立即关闭开局提示\n"+
+                "双击Tab键\t切换二维码开关\n"+
+                "长按Tab键\t显示卡牌/符文/药丸，如果此时显示的是道具/饰品信息，二维码会切换会为不透明显示\n"+
+                "Tab+Ctrl\t在雅各和以扫的游戏中，显示以扫的卡牌/符文/药丸信息"
+                );
         }
     }
 }
