@@ -109,11 +109,16 @@ WikiDic.pillDesc = {
 }
 
 function WikiDic:SpriteIsQuestionmark(entitySprite, questionSprite)
-	if not entitySprite:IsPlaying("Idle") then
+	local name = nil
+	if entitySprite:IsPlaying("Idle") then
+		name = "Idle"
+	elseif entitySprite:IsFinished("ShopIdle") then
+		name = "ShopIdle"
+	else
 		return false
 	end
 
-	questionSprite:SetFrame("Idle",entitySprite:GetFrame())
+	questionSprite:SetFrame(name,entitySprite:GetFrame())
 	-- check some point, if returns false, it is not same with question mark
 	for i = -70,0,2 do
 		local qcolor = questionSprite:GetTexel(Vector(0,i),WikiDic.nullVector,1,1)
