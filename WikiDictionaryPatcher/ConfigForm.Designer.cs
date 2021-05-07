@@ -59,12 +59,15 @@
             this.qrCodeNo = new System.Windows.Forms.RadioButton();
             this.qrCodeYes = new System.Windows.Forms.RadioButton();
             this.groupBox8 = new System.Windows.Forms.GroupBox();
-            this.textTransparentBar = new System.Windows.Forms.TrackBar();
             this.textTransparentLabel = new System.Windows.Forms.Label();
+            this.textTransparentBar = new System.Windows.Forms.TrackBar();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
             this.qrTransparentLabel = new System.Windows.Forms.Label();
             this.qrTransparentBar = new System.Windows.Forms.TrackBar();
             this.button1 = new System.Windows.Forms.Button();
+            this.groupBox10 = new System.Windows.Forms.GroupBox();
+            this.ShowItemIDNo = new System.Windows.Forms.RadioButton();
+            this.ShowItemIDYes = new System.Windows.Forms.RadioButton();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -76,6 +79,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.textTransparentBar)).BeginInit();
             this.groupBox9.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.qrTransparentBar)).BeginInit();
+            this.groupBox10.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -273,7 +277,7 @@
             // 
             // yseButton
             // 
-            this.yseButton.Location = new System.Drawing.Point(208, 390);
+            this.yseButton.Location = new System.Drawing.Point(208, 452);
             this.yseButton.Name = "yseButton";
             this.yseButton.Size = new System.Drawing.Size(75, 23);
             this.yseButton.TabIndex = 5;
@@ -283,7 +287,7 @@
             // 
             // cancelButton
             // 
-            this.cancelButton.Location = new System.Drawing.Point(289, 390);
+            this.cancelButton.Location = new System.Drawing.Point(289, 452);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
             this.cancelButton.TabIndex = 6;
@@ -425,6 +429,16 @@
             this.groupBox8.TabStop = false;
             this.groupBox8.Text = " 文字透明度(0%为全透明)";
             // 
+            // textTransparentLabel
+            // 
+            this.textTransparentLabel.AutoSize = true;
+            this.textTransparentLabel.Location = new System.Drawing.Point(234, 36);
+            this.textTransparentLabel.Name = "textTransparentLabel";
+            this.textTransparentLabel.Size = new System.Drawing.Size(23, 12);
+            this.textTransparentLabel.TabIndex = 1;
+            this.textTransparentLabel.Text = "60%";
+            this.textTransparentLabel.Click += new System.EventHandler(this.textTransparentLabel_Click);
+            // 
             // textTransparentBar
             // 
             this.textTransparentBar.Location = new System.Drawing.Point(7, 20);
@@ -435,16 +449,6 @@
             this.textTransparentBar.TickStyle = System.Windows.Forms.TickStyle.Both;
             this.textTransparentBar.Value = 12;
             this.textTransparentBar.Scroll += new System.EventHandler(this.trackBar1_Scroll);
-            // 
-            // textTransparentLabel
-            // 
-            this.textTransparentLabel.AutoSize = true;
-            this.textTransparentLabel.Location = new System.Drawing.Point(234, 36);
-            this.textTransparentLabel.Name = "textTransparentLabel";
-            this.textTransparentLabel.Size = new System.Drawing.Size(23, 12);
-            this.textTransparentLabel.TabIndex = 1;
-            this.textTransparentLabel.Text = "60%";
-            this.textTransparentLabel.Click += new System.EventHandler(this.textTransparentLabel_Click);
             // 
             // groupBox9
             // 
@@ -479,7 +483,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(434, 390);
+            this.button1.Location = new System.Drawing.Point(434, 452);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(126, 23);
             this.button1.TabIndex = 10;
@@ -487,12 +491,46 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // groupBox10
+            // 
+            this.groupBox10.Controls.Add(this.ShowItemIDNo);
+            this.groupBox10.Controls.Add(this.ShowItemIDYes);
+            this.groupBox10.Location = new System.Drawing.Point(12, 370);
+            this.groupBox10.Name = "groupBox10";
+            this.groupBox10.Size = new System.Drawing.Size(271, 55);
+            this.groupBox10.TabIndex = 6;
+            this.groupBox10.TabStop = false;
+            this.groupBox10.Text = "显示物品ID";
+            // 
+            // ShowItemIDNo
+            // 
+            this.ShowItemIDNo.AutoSize = true;
+            this.ShowItemIDNo.Location = new System.Drawing.Point(145, 20);
+            this.ShowItemIDNo.Name = "ShowItemIDNo";
+            this.ShowItemIDNo.Size = new System.Drawing.Size(35, 16);
+            this.ShowItemIDNo.TabIndex = 2;
+            this.ShowItemIDNo.Text = "否";
+            this.ShowItemIDNo.UseVisualStyleBackColor = true;
+            // 
+            // ShowItemIDYes
+            // 
+            this.ShowItemIDYes.AutoSize = true;
+            this.ShowItemIDYes.Checked = true;
+            this.ShowItemIDYes.Location = new System.Drawing.Point(18, 20);
+            this.ShowItemIDYes.Name = "ShowItemIDYes";
+            this.ShowItemIDYes.Size = new System.Drawing.Size(35, 16);
+            this.ShowItemIDYes.TabIndex = 1;
+            this.ShowItemIDYes.TabStop = true;
+            this.ShowItemIDYes.Text = "是";
+            this.ShowItemIDYes.UseVisualStyleBackColor = true;
+            // 
             // ConfigForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(576, 425);
+            this.ClientSize = new System.Drawing.Size(576, 487);
             this.ControlBox = false;
+            this.Controls.Add(this.groupBox10);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.groupBox9);
             this.Controls.Add(this.groupBox8);
@@ -529,6 +567,8 @@
             this.groupBox9.ResumeLayout(false);
             this.groupBox9.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.qrTransparentBar)).EndInit();
+            this.groupBox10.ResumeLayout(false);
+            this.groupBox10.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -573,5 +613,8 @@
         private System.Windows.Forms.Label qrTransparentLabel;
         private System.Windows.Forms.TrackBar qrTransparentBar;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.GroupBox groupBox10;
+        private System.Windows.Forms.RadioButton ShowItemIDNo;
+        private System.Windows.Forms.RadioButton ShowItemIDYes;
     }
 }

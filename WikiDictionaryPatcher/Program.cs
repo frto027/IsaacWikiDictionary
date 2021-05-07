@@ -1,5 +1,5 @@
 ﻿#if DEBUG
-//#define USE_DIRECT_WIKI_ACCESS
+#define USE_DIRECT_WIKI_ACCESS
 #define USE_LOCALHOST_DIRECT_WIKI_ACCESS
 #endif
 
@@ -34,6 +34,7 @@ namespace WikiDictionaryPatcher
         public bool use_bigger_font;
         public bool use_dx_16_font, use_dx_12_font, use_st_16_font, use_st_12_font,use_st_10_font, use_default_font;
         public bool renderQrCode;
+        public bool showItemID;
 
         public string textTransparent, qrTransparent;
     }
@@ -257,28 +258,36 @@ namespace WikiDictionaryPatcher
             string desc_dict = "";
             foreach(var item in descs)
             {
-                string d = item.Value.name + "\n" + item.Value.desc;
+                string d = item.Value.name +
+                    (options.showItemID ? " (c" + item.Value.id + ")" : "") + "\n" + 
+                    item.Value.desc;
                 d = d.Replace("\\", "\\\\").Replace("\n", "\\n").Replace("\"", "\\\"");
                 desc_dict += string.Format("[{0}]=\"{1}\",\n", item.Value.id, d);
             }
             string trinket_desc = "";
             foreach (var item in trinket_descs)
             {
-                string d = item.Value.name + "\n" + item.Value.desc;
+                string d = item.Value.name +
+                    (options.showItemID ? " (t" + item.Value.id + ")": "") + "\n" +
+                    item.Value.desc;
                 d = d.Replace("\\", "\\\\").Replace("\n", "\\n").Replace("\"", "\\\"");
                 trinket_desc += string.Format("[{0}]=\"{1}\",\n", item.Value.id, d);
             }
             string card_desc = "";
             foreach (var item in card_descs)
             {
-                string d = item.Value.name + "\n" + item.Value.desc;
+                string d = item.Value.name +
+                    (options.showItemID ? " (k" + item.Value.id + ")": "") + "\n" +
+                    item.Value.desc;
                 d = d.Replace("\\", "\\\\").Replace("\n", "\\n").Replace("\"", "\\\"");
                 card_desc += string.Format("[{0}]=\"{1}\",\n", item.Value.id, d);
             }
             string pill_desc = "";
             foreach (var item in pill_descs)
             {
-                string d = item.Value.name + "\n" + item.Value.desc;
+                string d = item.Value.name +
+                    (options.showItemID ? " (p" + item.Value.id + ")" : "") + "\n" +
+                    item.Value.desc;
                 d = d.Replace("\\", "\\\\").Replace("\n", "\\n").Replace("\"", "\\\"");
                 pill_desc += string.Format("[{0}]=\"{1}\",\n", item.Value.id, d);
             }
