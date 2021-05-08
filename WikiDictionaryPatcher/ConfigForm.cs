@@ -53,6 +53,7 @@ namespace WikiDictionaryPatcher
             options.use_default_font = defaultFont.Checked;
             options.renderQrCode = qrCodeYes.Checked;
             options.showItemID = ShowItemIDYes.Checked;
+            options.showSpindownDice = SpindownDiceYse.Checked;
 
             {
                 int p = textTransparentBar.Value * 100 / textTransparentBar.Maximum;

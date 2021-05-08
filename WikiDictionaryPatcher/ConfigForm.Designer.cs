@@ -68,6 +68,10 @@
             this.groupBox10 = new System.Windows.Forms.GroupBox();
             this.ShowItemIDNo = new System.Windows.Forms.RadioButton();
             this.ShowItemIDYes = new System.Windows.Forms.RadioButton();
+            this.groupBox11 = new System.Windows.Forms.GroupBox();
+            this.SpindownDiceNo = new System.Windows.Forms.RadioButton();
+            this.SpindownDiceYse = new System.Windows.Forms.RadioButton();
+            this.label3 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -80,6 +84,7 @@
             this.groupBox9.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.qrTransparentBar)).BeginInit();
             this.groupBox10.SuspendLayout();
+            this.groupBox11.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -524,12 +529,57 @@
             this.ShowItemIDYes.Text = "是";
             this.ShowItemIDYes.UseVisualStyleBackColor = true;
             // 
+            // groupBox11
+            // 
+            this.groupBox11.Controls.Add(this.SpindownDiceNo);
+            this.groupBox11.Controls.Add(this.SpindownDiceYse);
+            this.groupBox11.Location = new System.Drawing.Point(289, 370);
+            this.groupBox11.Name = "groupBox11";
+            this.groupBox11.Size = new System.Drawing.Size(271, 55);
+            this.groupBox11.TabIndex = 7;
+            this.groupBox11.TabStop = false;
+            this.groupBox11.Text = "显示Spindown Dice指示器（道具ID 723）";
+            // 
+            // SpindownDiceNo
+            // 
+            this.SpindownDiceNo.AutoSize = true;
+            this.SpindownDiceNo.Location = new System.Drawing.Point(145, 20);
+            this.SpindownDiceNo.Name = "SpindownDiceNo";
+            this.SpindownDiceNo.Size = new System.Drawing.Size(35, 16);
+            this.SpindownDiceNo.TabIndex = 2;
+            this.SpindownDiceNo.Text = "否";
+            this.SpindownDiceNo.UseVisualStyleBackColor = true;
+            // 
+            // SpindownDiceYse
+            // 
+            this.SpindownDiceYse.AutoSize = true;
+            this.SpindownDiceYse.Checked = true;
+            this.SpindownDiceYse.Location = new System.Drawing.Point(18, 20);
+            this.SpindownDiceYse.Name = "SpindownDiceYse";
+            this.SpindownDiceYse.Size = new System.Drawing.Size(35, 16);
+            this.SpindownDiceYse.TabIndex = 1;
+            this.SpindownDiceYse.TabStop = true;
+            this.SpindownDiceYse.Text = "是";
+            this.SpindownDiceYse.UseVisualStyleBackColor = true;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.ForeColor = System.Drawing.SystemColors.AppWorkspace;
+            this.label3.Location = new System.Drawing.Point(235, 428);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(329, 12);
+            this.label3.TabIndex = 11;
+            this.label3.Text = "*未解锁物品会被Spindown Dice指示器显示，导致信息不准确";
+            // 
             // ConfigForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(576, 487);
             this.ControlBox = false;
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.groupBox11);
             this.Controls.Add(this.groupBox10);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.groupBox9);
@@ -569,6 +619,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.qrTransparentBar)).EndInit();
             this.groupBox10.ResumeLayout(false);
             this.groupBox10.PerformLayout();
+            this.groupBox11.ResumeLayout(false);
+            this.groupBox11.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -616,5 +668,9 @@
         private System.Windows.Forms.GroupBox groupBox10;
         private System.Windows.Forms.RadioButton ShowItemIDNo;
         private System.Windows.Forms.RadioButton ShowItemIDYes;
+        private System.Windows.Forms.GroupBox groupBox11;
+        private System.Windows.Forms.RadioButton SpindownDiceNo;
+        private System.Windows.Forms.RadioButton SpindownDiceYse;
+        private System.Windows.Forms.Label label3;
     }
 }

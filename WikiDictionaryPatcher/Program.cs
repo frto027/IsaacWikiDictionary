@@ -35,6 +35,7 @@ namespace WikiDictionaryPatcher
         public bool use_dx_16_font, use_dx_12_font, use_st_16_font, use_st_12_font,use_st_10_font, use_default_font;
         public bool renderQrCode;
         public bool showItemID;
+        public bool showSpindownDice;
 
         public string textTransparent, qrTransparent;
     }
@@ -820,6 +821,7 @@ namespace WikiDictionaryPatcher
                             patch += "WikiDic.renderQrcode = " + (dicOptions.renderQrCode ? "true" : "false") + "\n";
                             patch += "WikiDic.textTransparent = " + dicOptions.textTransparent + "\n";
                             patch += "WikiDic.qrTransparent = " + dicOptions.qrTransparent + "\n";
+                            patch += "WikiDic.showSpindownDice = " + (dicOptions.showSpindownDice ? "true" : "false") + "\n";
                         }
                         else if (line == FAKE_TRINKET_DESC_CONTENT)
                         {
@@ -932,6 +934,13 @@ namespace WikiDictionaryPatcher
                 //patch qrcode anim
                 new FileInfo(RES_FOLDER_PATCH + @"\qrcode\qrcode.anm2").CopyTo(qrcodeFolder + "qrcode.anm2");
             }
+
+            //patch spindown dice
+            if (dicOptions.showSpindownDice)
+            {
+                new FileInfo(RES_FOLDER_PATCH + @"\itempreview.anm2")
+                    .CopyTo(res_folder + @"itempreview.anm2");
+            }
         }
 
         private static void SaveQrCode(string path, Gma.QrCodeNet.Encoding.QrCode qrCode)
@@ -961,7 +970,7 @@ namespace WikiDictionaryPatcher
 
         private static string GetHuijiWikiUrl(string name)
         {
-            return version.huijiUrlPrefix + HttpUtility.UrlPathEncode(name) + "?IsaacWikiDicVersion=" + VERSION;
+            return version.huijiUrlPrefix + HttpUtility.UrlPathEncode(name) + " ? IsaacWikiDicVersion=" + VERSION;
         }
 
 #if DEBUG

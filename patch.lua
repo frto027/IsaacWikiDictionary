@@ -17,13 +17,24 @@ WikiDic.distYMulti = 1
 WikiDic.taintIsaacOffset = Vector(0,25)
 WikiDic.taintQQQOffset = Vector(0,15)
 WikiDic.authRemains = 60*9
-WikiDic.lineDistance = 0
+WikiDic.lineDistance = 1
 WikiDic.authTexts = {}
-WikiDic.qrcodeToggle = false
-WikiDic.qrcodeToggleCounter = 0
-WikiDic.qrcodeToggleCounterInit = 30
+WikiDic.tabRenderToggle = false
+WikiDic.tabRenderToggleCounter = 0
+WikiDic.tabRenderToggleCounterInit = 30
 WikiDic.qrCodeOffset = Vector(10,0)
 WikiDic.questionMarkSprite = nil
+WikiDic.spindownDiceItemSprites = nil
+WikiDic.currentSpindownDiceItemID = -1
+WikiDic.currentSpindownDiceItemDisplayCount = 0
+WikiDic.ItemConfig = nil
+WikiDic.spindownLineStartOffset = Vector(-15,4)
+WikiDic.spindownFirstHoriOffset = Vector(20,0)
+WikiDic.spindownDiceHoriOffset = Vector(15,0)
+WikiDic.spindownDiceVertOffset = Vector(0,20)
+WikiDic.spindownDiceScale = 0.5
+WikiDic.spindownDiceId = 723
+WikiDic.playerHasSpindownDice = false
 
 WikiDic.huijiTQrCodeInfo = "双击Tab键（地图键）开关二维码显示"
 WikiDic.huijiWikiInfo = {
@@ -36,6 +47,15 @@ WikiDic.fandomWikiInfo = {
 	"English information comes from:",
 	"The Binding of Isaac:Rebirth wiki",
 	"https://bindingofisaacrebirth.fandom.com/"
+}
+
+WikiDic.spindownDiceSkip = {
+	[656] = true,
+	[710] = true,
+	[711] = true,
+	[713] = true,
+	[714] = true,
+	[715] = true,
 }
 
 WikiDic.nullVector = Vector(0,0)
@@ -64,6 +84,7 @@ if WikiDic.useHalfSizeFont then
 	WikiDic.iconScale = Vector(0.5,0.5)
 	WikiDic.fontScale = 0.5
 	WikiDic.taintIsaacOffset = Vector(3,27)
+	WikiDic.spindownLineStartOffset = Vector(-15,6)
 end
 if WikiDic.useBiggerSizeFont then
 	WikiDic.renderPos = Vector(80,45)
@@ -74,6 +95,7 @@ if WikiDic.useBiggerSizeFont then
 	WikiDic.fontScale = 1.2
 	WikiDic.taintIsaacOffset = Vector(0,25)
 	WikiDic.lineDistance = 3
+	WikiDic.spindownLineStartOffset = Vector(-15,0)
 end
 if WikiDic.useHuijiWiki then
 	if WikiDic.renderQrcode then
@@ -166,6 +188,7 @@ end
 
 function WikiDic:Update()
 	WikiDic.targetEntity = nil
+	WikiDic.playerHasSpindownDice = false
 	-- if (Game():GetLevel():GetCurses() & LevelCurse.CURSE_OF_BLIND) ~= 0 then
 	-- 	return
 	-- end
@@ -188,7 +211,12 @@ function WikiDic:Update()
 					end
 				end
 			end
+		elseif WikiDic.showSpindownDice and not WikiDic.playerHasSpindownDice and e.Type == 1 then
+			-- e is player
+			local eplayer = e:ToPlayer()
+			WikiDic.playerHasSpindownDice = eplayer and eplayer:HasCollectible(WikiDic.spindownDiceId)
 		end
+
 	end
 	if WikiDic.targetEntity and WikiDic.targetEntity.Type == 5 and WikiDic.targetEntity.Variant == 100 and WikiDic:IsQuestionMarkTexture(WikiDic.targetEntity) then
 		-- "Glitched Crown" costs too much cpu if we judge the question mark in the previous loop
@@ -275,6 +303,27 @@ function WikiDic:InitFonts()
 			WikiDic.qrCodeIsTransparent = true
 		end
 
+		WikiDic.ItemConfig = Isaac.GetItemConfig()
+		if WikiDic.showSpindownDice then
+			WikiDic.spindownDiceItemSprites = {Sprite(), Sprite(), Sprite(), Sprite(), Sprite()}
+			for _, s in pairs(WikiDic.spindownDiceItemSprites) do
+				s:Load("wd_res/itempreview.anm2",true)
+				s:SetFrame("show",1)
+				s.Color = Color(1,1,1,WikiDic.textTransparent,0,0,0)
+				s.Scale = Vector(WikiDic.spindownDiceScale, WikiDic.spindownDiceScale)
+			end
+
+			-- draw spindown dice icon at 0
+			WikiDic.spindownDiceItemSprites[0] = Sprite()
+			WikiDic.spindownDiceItemSprites[0]:Load("wd_res/itempreview.anm2",true)
+			WikiDic.spindownDiceItemSprites[0]:SetFrame("show",1)
+			WikiDic.spindownDiceItemSprites[0].Color = Color(1,1,1,WikiDic.textTransparent,0,0,0)
+			WikiDic.spindownDiceItemSprites[0].Scale = Vector(WikiDic.spindownDiceScale, WikiDic.spindownDiceScale)
+			WikiDic.spindownDiceItemSprites[0]:ReplaceSpritesheet(0,WikiDic.ItemConfig:GetCollectible(WikiDic.spindownDiceId).GfxFileName)
+			WikiDic.spindownDiceItemSprites[0]:LoadGraphics()
+
+		end
+
 		WikiDic.questionMarkSprite = Sprite()
 		WikiDic.questionMarkSprite:Load("gfx/005.100_collectible.anm2",true)
 		WikiDic.questionMarkSprite:ReplaceSpritesheet(1,"gfx/items/collectibles/questionmark.png")
@@ -312,7 +361,8 @@ function WikiDic:RenderCallback()
 
 	local is_Jacob_and_Esau = Isaac.GetPlayer(0).SubType == 19 and Isaac.GetPlayer(1).SubType == 20
 	local player_index = is_Jacob_and_Esau and Input.IsActionPressed(ButtonAction.ACTION_DROP,Isaac.GetPlayer(0).ControllerIndex) and 1 or 0
-	
+	local playse_has_spindown_dice = Isaac.GetPlayer(0):HasCollectible(WikiDic.spindownDiceId) or (is_Jacob_and_Esau and Isaac.GetPlayer(1):HasCollectible(WikiDic.spindownDiceId))
+
 	local itemPool = Game():GetItemPool()
 	local pill_color = Isaac.GetPlayer(player_index):GetPill(0)
 	local card_hold = WikiDic.useHuijiWiki and map_btn_pressed and Isaac.GetPlayer(player_index):GetCard(0) or 0
@@ -344,16 +394,18 @@ function WikiDic:RenderCallback()
 	end
 
 	local contains_qrcode = false
-	--toggle qrcode
+	local contains_spindown_dice = false
+
+	--toggle tab rander
 	local map_btn_triggered = Input.IsActionTriggered(ButtonAction.ACTION_MAP,Isaac.GetPlayer(0).ControllerIndex)
-	if WikiDic.qrcodeToggleCounter > 0 then
-		WikiDic.qrcodeToggleCounter = WikiDic.qrcodeToggleCounter - 1
+	if WikiDic.tabRenderToggleCounter > 0 then
+		WikiDic.tabRenderToggleCounter = WikiDic.tabRenderToggleCounter - 1
 		if map_btn_triggered then
-			WikiDic.qrcodeToggleCounter = 0
-			WikiDic.qrcodeToggle = not WikiDic.qrcodeToggle
+			WikiDic.tabRenderToggleCounter = 0
+			WikiDic.tabRenderToggle = not WikiDic.tabRenderToggle
 		end
-	elseif WikiDic.renderQrcode and map_btn_triggered then
-		WikiDic.qrcodeToggleCounter = WikiDic.qrcodeToggleCounterInit
+	elseif map_btn_triggered then
+		WikiDic.tabRenderToggleCounter = WikiDic.tabRenderToggleCounterInit
 	end
 
 
@@ -410,8 +462,35 @@ function WikiDic:RenderCallback()
 				sprite:RenderLayer(1,next_line + icon_offset,WikiDic.nullVector,WikiDic.nullVector)
 				sprite.Scale = oldScale
 
+				--update spindown dice item info
+				if WikiDic.playerHasSpindownDice then
+					contains_spindown_dice = true
+					if WikiDic.currentSpindownDiceItemID ~= entity_id then
+						WikiDic.currentSpindownDiceItemID = entity_id
+						if WikiDic.desc[entity_id] then
+							local cur_entity = entity_id
+							local cur_sprites_i = 1
+							repeat
+								if ItemConfig.Config.IsValidCollectible(cur_entity) and not WikiDic.spindownDiceSkip[cur_entity] then
+									WikiDic.spindownDiceItemSprites[cur_sprites_i]:ReplaceSpritesheet(0,WikiDic.ItemConfig:GetCollectible(cur_entity).GfxFileName)
+									WikiDic.spindownDiceItemSprites[cur_sprites_i]:LoadGraphics()
+									cur_sprites_i = cur_sprites_i + 1
+								end
+								cur_entity = cur_entity - 1
+							until cur_entity == 0 or cur_sprites_i > #WikiDic.spindownDiceItemSprites
+							-- WikiDic.spindownDiceItemSprites[cur_sprites_i] is not write
+							WikiDic.currentSpindownDiceItemDisplayCount = cur_sprites_i - 1
+
+						else
+							-- we dont show anything if it is a unknown item 
+							WikiDic.currentSpindownDiceItemDisplayCount = 0
+						end
+					end
+				end
+
+
 				--replace qrcode sprite
-				if WikiDic.qrcodeToggle then
+				if WikiDic.tabRenderToggle and WikiDic.renderQrcode then
 					contains_qrcode = true
 					local target_graph = "wd_res/qrcode/item_" .. tostring(entity_id) .. ".png"
 					if WikiDic.qrcodeGraph ~= target_graph then
@@ -446,7 +525,7 @@ function WikiDic:RenderCallback()
 				sprite.Scale = oldScale
 
 				--replace qrcode sprite
-				if WikiDic.qrcodeToggle then
+				if WikiDic.tabRenderToggle and WikiDic.renderQrcode then
 					contains_qrcode = true
 					local target_graph = "wd_res/qrcode/trinket_" .. tostring(trinket_id) .. ".png"
 					if WikiDic.qrcodeGraph ~= target_graph then
@@ -465,10 +544,25 @@ function WikiDic:RenderCallback()
 			next_line = next_line + Vector(0,WikiDic.font:GetLineHeight()*WikiDic.fontScale + WikiDic.lineDistance)
 			last = next
 		until last == nil
+
+		-- draw spindown dice
+		if contains_spindown_dice then
+			local spindown_dice_line = next_line + WikiDic.spindownLineStartOffset
+			for i = 0,WikiDic.currentSpindownDiceItemDisplayCount do
+				WikiDic.spindownDiceItemSprites[i]:RenderLayer(0,spindown_dice_line,WikiDic.nullVector,WikiDic.nullVector)
+				if i == 0 then
+					spindown_dice_line = spindown_dice_line + WikiDic.spindownFirstHoriOffset
+				else
+					spindown_dice_line = spindown_dice_line + WikiDic.spindownDiceHoriOffset
+				end
+			end
+			next_line = next_line + WikiDic.spindownDiceVertOffset
+		end
+
 		--draw qrcode
 		if contains_qrcode then
 			-- toggle transparent
-			if WikiDic.qrcodeToggleCounter == 0 and map_btn_pressed == WikiDic.qrCodeIsTransparent then
+			if WikiDic.tabRenderToggleCounter == 0 and map_btn_pressed == WikiDic.qrCodeIsTransparent then
 				if map_btn_pressed then
 					WikiDic.qrcodeSprite.Color = Color(1,1,1,1,0,0,0)
 					WikiDic.qrCodeIsTransparent = false
