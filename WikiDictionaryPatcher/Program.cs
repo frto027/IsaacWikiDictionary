@@ -495,13 +495,27 @@ namespace WikiDictionaryPatcher
                     {
                         if(child.Name == "span")
                         {
-                            var s = child.GetAttributeValue("title","");
-                            //translate s
-                            for (int i = 0; i < TranslateSpanMap.Length; i += 2)
-                                if (s == TranslateSpanMap[i])
-                                    s = TranslateSpanMap[i + 1];
+                            var s = child.GetAttributeValue("title", null);
                             if (s != null)
-                                str += "[" + s + "]";
+                            {
+                                //translate s
+                                for (int i = 0; i < TranslateSpanMap.Length; i += 2)
+                                    if (s == TranslateSpanMap[i])
+                                        s = TranslateSpanMap[i + 1];
+                                if (s != null)
+                                    str += "[" + s + "]";
+                            }
+                            else
+                            {
+                                //this is a hack
+                                //reparse the child html after wikitext
+                                s = child.InnerHtml; 
+                                s = Regex.Replace(s, @"\[\[文件(.*?)(\|.*?)?\]\]", (e) => "");//remove file
+                                s = Regex.Replace(s, @"\[\[(.*?)(\|(.*?))?\]\]", e => e.Groups[3].Value == "" ? e.Groups[0].Value : e.Groups[3].Value);
+                                var html = new HtmlAgilityPack.HtmlDocument();
+                                html.LoadHtml(s);
+                                str += html.DocumentNode.InnerText;
+                            }
                         }
                         else
                         {
@@ -542,15 +556,29 @@ namespace WikiDictionaryPatcher
                     string str = "";
                     foreach (var child in node.ChildNodes)
                     {
-                        if (child.Name == "span")
+                        if (child.Name == "span" )
                         {
-                            var s = child.GetAttributeValue("title", "");
-                            //translate s
-                            for (int i = 0; i < TranslateSpanMap.Length; i += 2)
-                                if (s == TranslateSpanMap[i])
-                                    s = TranslateSpanMap[i + 1];
-                            if (s != null)
-                                str += "[" + s + "]";
+                            var s = child.GetAttributeValue("title", null);
+                            if(s != null)
+                            {
+                                //translate s
+                                for (int i = 0; i < TranslateSpanMap.Length; i += 2)
+                                    if (s == TranslateSpanMap[i])
+                                        s = TranslateSpanMap[i + 1];
+                                if (s != null)
+                                    str += "[" + s + "]";
+                            }
+                            else
+                            {
+                                //this is a hack
+                                //reparse the child html after wikitext
+                                s = child.InnerHtml;
+                                s = Regex.Replace(s, @"\[\[文件(.*?)(\|.*?)?\]\]", (e) => "");//remove file
+                                s = Regex.Replace(s, @"\[\[(.*?)(\|(.*?))?\]\]", e => e.Groups[3].Value == "" ? e.Groups[0].Value : e.Groups[3].Value);
+                                var html = new HtmlAgilityPack.HtmlDocument();
+                                html.LoadHtml(s);
+                                str += html.DocumentNode.InnerText;
+                            }
                         }
                         else
                         {
@@ -589,13 +617,27 @@ namespace WikiDictionaryPatcher
                     {
                         if (child.Name == "span")
                         {
-                            var s = child.GetAttributeValue("title", "");
-                            //translate s
-                            for (int i = 0; i < TranslateSpanMap.Length; i += 2)
-                                if (s == TranslateSpanMap[i])
-                                    s = TranslateSpanMap[i + 1];
+                            var s = child.GetAttributeValue("title", null);
                             if (s != null)
-                                str += "[" + s + "]";
+                            {
+                                //translate s
+                                for (int i = 0; i < TranslateSpanMap.Length; i += 2)
+                                    if (s == TranslateSpanMap[i])
+                                        s = TranslateSpanMap[i + 1];
+                                if (s != null)
+                                    str += "[" + s + "]";
+                            }
+                            else
+                            {
+                                //this is a hack
+                                //reparse the child html after wikitext
+                                s = child.InnerHtml;
+                                s = Regex.Replace(s, @"\[\[文件(.*?)(\|.*?)?\]\]", (e) => "");//remove file
+                                s = Regex.Replace(s, @"\[\[(.*?)(\|(.*?))?\]\]", e => e.Groups[3].Value == "" ? e.Groups[0].Value : e.Groups[3].Value);
+                                var html = new HtmlAgilityPack.HtmlDocument();
+                                html.LoadHtml(s);
+                                str += html.DocumentNode.InnerText;
+                            }
                         }
                         else
                         {
@@ -634,13 +676,27 @@ namespace WikiDictionaryPatcher
                     {
                         if (child.Name == "span")
                         {
-                            var s = child.GetAttributeValue("title", "");
-                            //translate s
-                            for (int i = 0; i < TranslateSpanMap.Length; i += 2)
-                                if (s == TranslateSpanMap[i])
-                                    s = TranslateSpanMap[i + 1];
+                            var s = child.GetAttributeValue("title", null);
                             if (s != null)
-                                str += "[" + s + "]";
+                            {
+                                //translate s
+                                for (int i = 0; i < TranslateSpanMap.Length; i += 2)
+                                    if (s == TranslateSpanMap[i])
+                                        s = TranslateSpanMap[i + 1];
+                                if (s != null)
+                                    str += "[" + s + "]";
+                            }
+                            else
+                            {
+                                //this is a hack
+                                //reparse the child html after wikitext
+                                s = child.InnerHtml;
+                                s = Regex.Replace(s, @"\[\[文件(.*?)(\|.*?)?\]\]", (e) => "");//remove file
+                                s = Regex.Replace(s, @"\[\[(.*?)(\|(.*?))?\]\]", e => e.Groups[3].Value == "" ? e.Groups[0].Value : e.Groups[3].Value);
+                                var html = new HtmlAgilityPack.HtmlDocument();
+                                html.LoadHtml(s);
+                                str += html.DocumentNode.InnerText;
+                            }
                         }
                         else
                         {
