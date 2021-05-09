@@ -16,6 +16,33 @@
 
 如果想要使用wiki的api自行编写机器人，请务必遵守相应的礼仪规范。
 
+# 在游戏中是怎么工作的
+
+> 图鉴功能越来越多，如果一开始不设计好，很容易就会写烂尾。这是一份超简易的工作方式的说明。
+### 安装
+安装器使用`C#`编写，原因是功能够用的情况下可以避开一系列的奇怪问题，确保不会有人问出`为啥python下载不了` `为啥node安装不上` `为什么ClassNotFoundException` `java下载的时候要怎么注册` `找不到动态链接库该怎么办`这样的问题。
+
+安装器运行后，会将wd_res文件夹中的文件根据功能需要，拷贝到游戏的resource文件夹。也会将patch.lua文件追加到游戏的`resources\scripts\main.lua`末尾，但会进行一些修改。  
+- lua的首尾添加`-- WikiDic MARK START --` `-- WikiDict MARK END --`用来标记改动位置。main.lua中是否存在这两个标记，会作为图鉴是否安装的标准。
+- lua的末尾追加类似`-- WIKIDIC_VERSION_1 --`这样的字符串，通过识别这个字符串来了解玩家安装的是哪个版本的图鉴，有些版本之间不兼容，卸载会出问题，这样就能识别这种情况并给出提示。这个标记只在新版本有，所以没有这个标记就说明是旧版本。
+- lua中的`-- FAKE_DESC_CONTENT --` `-- FAKE_TRINKET_CONTENT` `-- FAKE_CARD_CONTENT --` `-- FAKE_PILL_CONTENT`被替换成从wiki中下载解析得到的数据。
+- lua中的`-- FAKE_CONFIG_SEG_1 --`被替换成安装配置数据
+
+### 卸载
+
+最新的版本在卸载时，先检查`-- WIKIDIC_VERSION_1 --`这样的版本标记，如果符合，就将main.lua中的`-- WikiDic MARK START --` `-- WikiDict MARK END --`两个标记中间的代码删掉，然后将`wd_res`文件夹整个删掉。不符合的话会提示使用对应版本卸载。
+
+### 游戏加载
+
+不论游戏是否启动了mod系统，它都会加载main.lua。游戏加载main.lua的时机发生在mod系统加载的时刻，但加载main.lua的时候mod系统并没有完全初始化，因此很多初始化代码不能放到lua文件中直接进行，所以就有了`WikiDic:InitFonts`函数。  
+
+
+当在lua中请求wd_res目录下的资源时，游戏会按照原有的逻辑，先去查找packed下已压缩的资源，但找不到这些资源，所以就会去查找未压缩的文件夹`wd_res`。这样就做到了给游戏追加中文字体、二维码图片等资源。
+
+# Debug版本编译无法下载元数据？
+
+把源码第二行注释掉即可，这是用来切换本地缓存的一个开关。是用来调试的。
+
 # 版权声明
 
 MIT LICENSE

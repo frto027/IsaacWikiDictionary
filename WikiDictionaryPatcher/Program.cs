@@ -97,30 +97,35 @@ namespace WikiDictionaryPatcher
         [STAThread]
         static void Main(string[] args)
         {
+            MessageBox.Show("版权声明：此图鉴程序著作权归属@frto027(bilibili/github/gitee：frto027、贴吧id：frt-027)所有，且保留追究责任的权利，任何形式的转载需注明出处。\n" +
+                "图鉴中展示的物品条例版权归原作者所有。\n\n" +
+                "此版本图鉴数据来源(致谢)：\n灰机wiki(https://isaac.huijiwiki.com/)\n" +
+                "Binding of Isaac: Rebirth Wiki is a Fandom Gaming Community(https://bindingofisaacrebirth.fandom.com/)");
 
-            MessageBox.Show("版权声明：此图鉴程序著作权归属@frto027(bilibili/github/gitee：frto027、贴吧id：frt-027)所有，且保留追究责任的权利，任何形式的转载需注明出处。\n图鉴中展示的物品条例版权归原作者所有。");
-            MessageBox.Show("此版本图鉴数据来源(致谢)：\n灰机wiki(https://isaac.huijiwiki.com/)\nBinding of Isaac: Rebirth Wiki is a Fandom Gaming Community(https://bindingofisaacrebirth.fandom.com/)");
 
-            
-
-            OpenFileDialog dialog = new OpenFileDialog();
-            dialog.Filter = "以撒主程序(isaac-ng.exe)|";
-            dialog.Title = "请选择以撒的主程序isaac-ng.exe(支持的游戏版本：胎衣+或忏悔)";
-            dialog.CheckFileExists = true;
-            if (dialog.ShowDialog() != DialogResult.OK)
+            string gameExePath = GuessSteamGamePath();
+            if(gameExePath == null || MessageBox.Show("已检测到Steam游戏路径：\n" + gameExePath + "\n是否直接使用？","自动检测成功",MessageBoxButtons.YesNo) == DialogResult.No)
             {
-                MessageBox.Show("已取消操作");
-                return;
-            }
+                OpenFileDialog dialog = new OpenFileDialog();
+                dialog.Filter = "以撒主程序(isaac-ng.exe)|";
+                dialog.Title = "请选择以撒的主程序isaac-ng.exe(支持的游戏版本：胎衣+或忏悔)";
+                dialog.CheckFileExists = true;
+                if (dialog.ShowDialog() != DialogResult.OK)
+                {
+                    MessageBox.Show("已取消操作");
+                    return;
+                }
 
-            if (!(dialog.FileName?.EndsWith("isaac-ng.exe") ?? false))
-            {
-                MessageBox.Show("文件名字不正确(需要选中以撒主文件isaac-ng.exe)");
-                return;
+                if (!(dialog.FileName?.EndsWith("isaac-ng.exe") ?? false))
+                {
+                    MessageBox.Show("文件名字不正确(需要选中以撒主文件isaac-ng.exe)");
+                    return;
+                }
+                gameExePath = dialog.FileName;
             }
 
             bool patched = false;
-            string lua_path = dialog.FileName + "\\..\\resources\\scripts\\main.lua";
+            string lua_path = gameExePath + "\\..\\resources\\scripts\\main.lua";
             string lua_text;
             using (FileStream f = new FileStream(lua_path, FileMode.Open))
             {
@@ -973,6 +978,69 @@ namespace WikiDictionaryPatcher
             return version.huijiUrlPrefix + HttpUtility.UrlPathEncode(name) + " ? IsaacWikiDicVersion=" + VERSION;
         }
 
+        private static string GuessSteamGamePath()
+        {
+            string CheckLibraryPath(string libPath)
+            {
+                var gamePath = libPath + @"\steamapps\common\The Binding of Isaac Rebirth\isaac-ng.exe";
+                var gameFile = new FileInfo(gamePath);
+                if (gameFile.Exists)
+                    return gameFile.FullName;
+                return null;
+            }
+
+            try
+            {
+                //get steam install path by read registry key "HKEY_CURRENT_USER\SOFTWARE\Valve\Steam".SteamPath
+                var key = Microsoft.Win32.RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.CurrentUser, Microsoft.Win32.RegistryView.Default);
+                if (key == null)
+                    return null;
+                key = key.OpenSubKey(@"SOFTWARE\Valve\Steam", false);
+                if (key == null)
+                    return null;
+                var steampath = key.GetValue("SteamPath", null) as string;
+                if (steampath == null)
+                    return null;
+                steampath = steampath.Replace("/", "\\");
+
+                {
+                    //this is default steam library path
+                    var gamepath = CheckLibraryPath(steampath);
+                    if (gamepath != null)
+                        return gamepath;
+                }
+
+                var configFile = new FileInfo(steampath + @"\config\config.vdf");
+                if (configFile.Exists == false)
+                    return null;
+
+                using (var fs = configFile.OpenRead())
+                {
+                    using (var reader = new StreamReader(fs))
+                    {
+                        while(reader.ReadLine() is string line)
+                        {
+                            var linearr = line.Trim('\t').Split(new string[] { "\t\t" },StringSplitOptions.RemoveEmptyEntries);
+                            if (linearr.Length != 2)
+                                continue;
+                            if (!linearr[0].StartsWith("\"BaseInstallFolder_"))
+                                continue;
+                            var libPath = linearr[1];
+                            if (libPath.Length < 2 || !libPath.StartsWith("\"") || !libPath.EndsWith("\""))
+                                continue;
+                            libPath = libPath.Substring(1, libPath.Length - 2);
+
+                            //now, libPath is a steam library path
+                            var gamepath = CheckLibraryPath(libPath);
+                            if (gamepath != null)
+                                return gamepath;
+
+                        }
+                    }
+                }
+            }catch(Exception) { }
+            return null;
+        }
 #if DEBUG
         private static VersionInfo GetDirectVersion()
         {
