@@ -1,3 +1,9 @@
+# 依赖说明
+
+如果您的电脑系统过旧（特定版本的Windows7及以下系统），需要安装.Net Framework 4.5.2才能正常使用。
+
+[点我下载.Net Framework 4.5.2](https://www.microsoft.com/zh-CN/download/details.aspx?id=42642)
+
 # 图鉴介绍
 
 这是一个可以自动下载道具介绍的以撒内置图鉴。
