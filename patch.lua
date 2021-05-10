@@ -289,6 +289,14 @@ end
 
 function WikiDic:InitFonts()
 	if WikiDic.font == nil then
+
+		-- get game version as EID
+		if Isaac.GetEntityTypeByName("Dogma") == 0 then
+			-- game version is Afterbirth+
+			-- turn off
+			WikiDic.showSpindownDice = false
+		end
+
 		WikiDic.font = Font()
 		WikiDic.font:Load(WikiDic.useDefaultFont and "font/terminus.fnt" or "wd_res/font/wdic_font.fnt")
 		WikiDic:FixReturn(WikiDic.desc)
