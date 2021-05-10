@@ -1,3 +1,9 @@
+# 下载地址
+
+此页是源代码，不是软件。
+
+下载软件：[点我下载](https://gitee.com/frto027/isaac-wiki-dictionary/releases)或[点我去github下载（备用）](https://github.com/frto027/IsaacWikiDictionary/releases)
+
 # 依赖说明
 
 如果您的电脑系统过旧（特定版本的Windows7及以下系统），需要安装.Net Framework 4.5.2才能正常使用。
