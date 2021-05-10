@@ -124,16 +124,28 @@ namespace WikiDictionaryPatcher
                 gameExePath = dialog.FileName;
             }
 
+            if (!EnsureSteamGameVersion(gameExePath))
+                return;
+
             bool patched = false;
             string lua_path = gameExePath + "\\..\\resources\\scripts\\main.lua";
             string lua_text;
-            using (FileStream f = new FileStream(lua_path, FileMode.Open))
+
             {
-                using(StreamReader reader = new StreamReader(f))
+                FileInfo luaFile = new FileInfo(lua_path);
+                if (luaFile.Exists == false)
                 {
-                    lua_text = reader.ReadToEnd();
-                    patched = lua_text.Contains(FAKE_LINE_BEGIN) && lua_text.Contains(FAKE_LINE_END);
-                    //Console.WriteLine(s);
+                    MessageBox.Show("没有检测到游戏下的resources\\scripts\\main.lua文件，游戏文件已损坏或版本不正确。请重新安装游戏或校验游戏完整性后再尝试安装。");
+                    return;
+                }
+                using (FileStream f = luaFile.OpenRead())
+                {
+                    using (StreamReader reader = new StreamReader(f))
+                    {
+                        lua_text = reader.ReadToEnd();
+                        patched = lua_text.Contains(FAKE_LINE_BEGIN) && lua_text.Contains(FAKE_LINE_END);
+                        //Console.WriteLine(s);
+                    }
                 }
             }
 
@@ -976,6 +988,83 @@ namespace WikiDictionaryPatcher
         private static string GetHuijiWikiUrl(string name)
         {
             return version.huijiUrlPrefix + HttpUtility.UrlPathEncode(name) + " ? IsaacWikiDicVersion=" + VERSION;
+        }
+
+        private static bool EnsureSteamGameVersion(string exePath)
+        {
+            try
+            {
+                var vdfFile = new FileInfo(exePath + @"\..\..\..\appmanifest_250900.acf");
+                if (vdfFile.Exists == false)//steam config file not detected.
+                    return true;
+
+                bool Afterbirth = false, AfterbirthPlus = false, Repentance = false;
+
+                using (var fs = vdfFile.OpenRead())
+                {
+                    using(var reader = new StreamReader(fs))
+                    {
+                        while(reader.ReadLine() is string line)
+                        {
+                            var cfg = line.Trim('\t').Split(new string[] { "\t\t" }, StringSplitOptions.RemoveEmptyEntries);
+                            if (cfg.Length != 2)
+                                continue;
+                            if(cfg[0] == "\"dlcappid\"")
+                            {
+                                if(cfg[1] == "\"401920\"")
+                                {
+                                    Afterbirth = true;
+                                }else if (cfg[1] == "\"570660\"")
+                                {
+                                    AfterbirthPlus = true;
+                                }
+                                if (cfg[1] == "\"1426300\"")
+                                {
+                                    Repentance = true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (Afterbirth && AfterbirthPlus && Repentance)
+                    return true;
+                string msg = "检测到存在未购买的DLC。\n";
+
+                if (!Afterbirth || !AfterbirthPlus)
+                    msg += "以下DLC是必须购买的：\n";
+                if (!Afterbirth)
+                    msg += "\t以撒的结合：胎衣（The Binding of Isaac: Afterbirth）\n";
+                if (!AfterbirthPlus)
+                    msg += "\t以撒的结合：胎衣+（The Binding of Isaac: Afterbirth+）\n";
+                if (!Afterbirth || !AfterbirthPlus)
+                    msg += "此图鉴依赖游戏的mod系统，因此如不购买上述DLC，您无法使用此图鉴进行游戏。\n";
+
+                if (!Repentance)
+                    msg += "此图鉴主要适配版本为忏悔，兼容胎衣+，建议购买以下DLC后进行使用：\n" +
+                        "\t以撒的结合：忏悔（The Binding of Isaac: Repentance）\n";
+
+                if (!Afterbirth || !AfterbirthPlus) 
+                {
+                    msg += "是否强制继续？如果忽略上述警告，可能会导致安装失败。";
+                }
+                else
+                {
+                    msg += "是否继续安装？";
+                }
+
+                if(MessageBox.Show(msg,"DLC检测警告",MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception) { }
+
+            return true;
         }
 
         private static string GuessSteamGamePath()
