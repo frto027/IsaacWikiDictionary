@@ -35,7 +35,7 @@ WikiDic.spindownDiceVertOffset = Vector(0,20)
 WikiDic.spindownDiceScale = 0.5
 WikiDic.spindownDiceId = 723
 WikiDic.playerHasSpindownDice = false
-WikiDic.schoolBagOffset = Vector(10,0)
+WikiDic.schoolBagOffset = Vector(30,0)
 WikiDic.schoolBagId = nil -- we don't need to add offset for school bag in rep
 WikiDic.playerHasSchoolBagAfterbirth = false
 
