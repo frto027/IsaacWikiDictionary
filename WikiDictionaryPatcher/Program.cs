@@ -1050,7 +1050,7 @@ namespace WikiDictionaryPatcher
                 }
                 else
                 {
-                    msg += "是否继续安装？";
+                    msg += "是否继续？";
                 }
 
                 if(MessageBox.Show(msg,"DLC检测警告",MessageBoxButtons.YesNo) == DialogResult.Yes)
