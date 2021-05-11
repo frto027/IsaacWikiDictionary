@@ -35,6 +35,9 @@ WikiDic.spindownDiceVertOffset = Vector(0,20)
 WikiDic.spindownDiceScale = 0.5
 WikiDic.spindownDiceId = 723
 WikiDic.playerHasSpindownDice = false
+WikiDic.schoolBagOffset = Vector(10,0)
+WikiDic.schoolBagId = nil -- we don't need to add offset for school bag in rep
+WikiDic.playerHasSchoolBagAfterbirth = false
 
 WikiDic.huijiTQrCodeInfo = "双击Tab键（地图键）开关二维码显示"
 WikiDic.huijiWikiInfo = {
@@ -189,6 +192,7 @@ end
 function WikiDic:Update()
 	WikiDic.targetEntity = nil
 	WikiDic.playerHasSpindownDice = false
+	WikiDic.playerHasSchoolBagAfterbirth = false
 	-- if (Game():GetLevel():GetCurses() & LevelCurse.CURSE_OF_BLIND) ~= 0 then
 	-- 	return
 	-- end
@@ -211,10 +215,17 @@ function WikiDic:Update()
 					end
 				end
 			end
-		elseif WikiDic.showSpindownDice and not WikiDic.playerHasSpindownDice and e.Type == 1 then
+		elseif e.Type == 1 then
 			-- e is player
 			local eplayer = e:ToPlayer()
-			WikiDic.playerHasSpindownDice = eplayer and eplayer:HasCollectible(WikiDic.spindownDiceId)
+			if eplayer then
+				if WikiDic.showSpindownDice and not WikiDic.playerHasSpindownDice then
+					WikiDic.playerHasSpindownDice = eplayer:HasCollectible(WikiDic.spindownDiceId)
+				end
+				if WikiDic.schoolBagId and not WikiDic.playerHasSchoolBagAfterbirth then
+					WikiDic.playerHasSchoolBagAfterbirth = eplayer:HasCollectible(WikiDic.schoolBagId)
+				end
+			end
 		end
 
 	end
@@ -295,6 +306,30 @@ function WikiDic:InitFonts()
 			-- game version is Afterbirth+
 			-- turn off
 			WikiDic.showSpindownDice = false
+			-- Afterbirth+ don't have question mark textures
+			WikiDic.IsQuestionMarkTexture = function() return false end
+			-- Remove rep items
+			for i in pairs(WikiDic.desc) do
+				if i >= CollectibleType.NUM_COLLECTIBLES then
+					WikiDic.desc[i] = nil
+				end
+			end
+			for i in pairs(WikiDic.trinketDesc) do
+				if i >= TrinketType.NUM_TRINKETS then
+					WikiDic.trinketDesc[i] = nil
+				end
+			end
+			for i in pairs(WikiDic.cardDesc) do
+				if i >= Card.NUM_CARDS then
+					WikiDic.cardDesc[i] = nil
+				end
+			end
+			for i in pairs(WikiDic.pillDesc) do
+				if i >= PillEffect.NUM_PILL_EFFECTS then
+					WikiDic.pillDesc[i] = nil
+				end
+			end
+			WikiDic.schoolBagId = CollectibleType.COLLECTIBLE_SCHOOLBAG
 		end
 
 		WikiDic.font = Font()
@@ -431,6 +466,9 @@ function WikiDic:RenderCallback()
 		local desc = nil
 		local last = 0
 		local next_line = WikiDic.renderPos --Vector(rpos.X,rpos.Y)
+		if WikiDic.playerHasSchoolBagAfterbirth then
+			next_line = next_line + WikiDic.schoolBagOffset
+		end
 		-- taint isaac is 21
 		if Isaac.GetPlayer(0).SubType == 21 then
 			next_line = next_line + WikiDic.taintIsaacOffset
