@@ -97,10 +97,13 @@ namespace WikiDictionaryPatcher
         [STAThread]
         static void Main(string[] args)
         {
+            /*
             MessageBox.Show("版权声明：此图鉴程序著作权归属@frto027(bilibili/github/gitee：frto027、贴吧id：frt-027)所有，且保留追究责任的权利，任何形式的转载需注明出处。\n" +
                 "图鉴中展示的物品条例版权归原作者所有。\n\n" +
                 "此版本图鉴数据来源(致谢)：\n灰机wiki(https://isaac.huijiwiki.com/)\n" +
-                "Binding of Isaac: Rebirth Wiki is a Fandom Gaming Community(https://bindingofisaacrebirth.fandom.com/)");
+                "Binding of Isaac: Rebirth Wiki is a Fandom Gaming Community(https://bindingofisaacrebirth.fandom.com/)");*/
+
+            new LicenseDialog().ShowDialog();
 
 
             string gameExePath = GuessSteamGamePath();
