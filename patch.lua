@@ -38,10 +38,11 @@ WikiDic.playerHasSpindownDice = false
 WikiDic.schoolBagOffset = Vector(30,0)
 WikiDic.schoolBagId = nil -- we don't need to add offset for school bag in rep
 WikiDic.playerHasSchoolBagAfterbirth = false
+WikiDic.ccIconSprite = nil
+WikiDic.ccText = "This work (WikiDictionary) is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License."
 
 WikiDic.huijiTQrCodeInfo = "双击Tab键（地图键）开关二维码显示"
 WikiDic.huijiWikiInfo = {
-	"按住Tab键（地图键）显示手上持有的卡牌/药丸/符文信息",
 	"中文图鉴信息来源：灰机wiki",
 	"https://isaac.huijiwiki.com/wiki",
 }
@@ -101,6 +102,7 @@ if WikiDic.useBiggerSizeFont then
 	WikiDic.spindownLineStartOffset = Vector(-15,0)
 end
 if WikiDic.useHuijiWiki then
+	WikiDic.ccText = "本作品(Wiki图鉴)采用知识共享署名-非商业性使用-相同方式共享 3.0 未本地化版本许可协议进行许可。"
 	if WikiDic.renderQrcode then
 		table.insert(WikiDic.authTexts, WikiDic.huijiTQrCodeInfo)
 	end
@@ -116,6 +118,12 @@ if WikiDic.useFandomWiki then
 	for _,text in pairs(WikiDic.fandomWikiInfo) do
 		table.insert(WikiDic.authTexts,text)
 	end
+end
+
+if WikiDic.useHuijiWiki then
+	table.insert(WikiDic.authTexts, "Wiki图鉴程序员：@frto027(bilibili/gitee/github), @frt-027(tieba)")
+else
+	table.insert(WikiDic.authTexts, "WikiDictionary programmer: @frto027(bilibili/gitee/github), @frt-027(tieba)")
 end
 
 WikiDic.desc = {
@@ -371,6 +379,13 @@ function WikiDic:InitFonts()
 		WikiDic.questionMarkSprite:Load("gfx/005.100_collectible.anm2",true)
 		WikiDic.questionMarkSprite:ReplaceSpritesheet(1,"gfx/items/collectibles/questionmark.png")
 		WikiDic.questionMarkSprite:LoadGraphics()
+
+		WikiDic.ccIconSprite = Sprite()
+		WikiDic.ccIconSprite:Load("wd_res/cc_icon.anm2", true)
+		WikiDic.ccIconSprite:SetFrame("show",1)
+		WikiDic.ccIconSprite.Scale = Vector(0.5, 0.5)
+		WikiDic.ccIconLineOffset = 80 * 0.5
+		WikiDic.ccIconVertOffset = 15 * 0.5
 	end
 end
 
@@ -423,16 +438,24 @@ function WikiDic:RenderCallback()
 		WikiDic.authRemains = WikiDic.authRemains - 1
 		local screen_center = Isaac.WorldToRenderPosition(Vector(320,240))
 
-		local y_pos = screen_center.Y - #WikiDic.authTexts * WikiDic.font:GetLineHeight() / 2
+		local y_pos = WikiDic.renderPos.Y -- screen_center.Y - #WikiDic.authTexts * WikiDic.font:GetLineHeight() / 2
 		local alpha = 0.6 --math.cos(WikiDic.authRemains * 0.1) * 0.1 + 0.5
 		if WikiDic.authRemains < 120 then
 			alpha = alpha * WikiDic.authRemains / 120
 		end
 
 		for _,text in pairs(WikiDic.authTexts) do
-			WikiDic.font:DrawStringScaledUTF8(text,WikiDic.renderPos.X,y_pos,WikiDic.fontScale,WikiDic.fontScale,KColor(1,1,1,alpha,0,0,0),0,true)
-			y_pos = y_pos + WikiDic.font:GetLineHeight() * WikiDic.fontScale + WikiDic.lineDistance
+			WikiDic.font:DrawStringScaledUTF8(text,WikiDic.renderPos.X,y_pos,0.5,0.5,KColor(1,1,1,alpha,0,0,0),0,true)
+			y_pos = y_pos + WikiDic.font:GetLineHeight() * 0.5 + 1
 		end
+
+		y_pos = y_pos + WikiDic.ccIconVertOffset
+
+		-- draw cc icon
+		WikiDic.ccIconSprite.Color = Color(1,1,1,alpha,0,0,0)
+		WikiDic.ccIconSprite:Render(Vector(WikiDic.renderPos.X,y_pos),WikiDic.nullVector,WikiDic.nullVector)
+		WikiDic.font:DrawStringScaledUTF8(WikiDic.ccText, WikiDic.renderPos.X, y_pos + WikiDic.ccIconVertOffset, 0.5, 0.5, KColor(1,1,1,alpha,0,0,0),0,true)
+
 		return
 	end
 
@@ -626,3 +649,4 @@ end
 
 WikiDic:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE,WikiDic.Update)
 WikiDic:AddCallback(ModCallbacks.MC_POST_RENDER,WikiDic.RenderCallback)
+

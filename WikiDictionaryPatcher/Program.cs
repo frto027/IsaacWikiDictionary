@@ -1,5 +1,5 @@
 ﻿#if DEBUG
-#define USE_DIRECT_WIKI_ACCESS
+//#define USE_DIRECT_WIKI_ACCESS
 #define USE_LOCALHOST_DIRECT_WIKI_ACCESS
 #endif
 
@@ -74,7 +74,7 @@ namespace WikiDictionaryPatcher
             RES_FOLDER_PATCH = "wd_res";
 #endif
         //this is network version, instead of file version
-        private static int VERSION = 2;
+        private static int VERSION = 3;
         private static string USER_AGENT = string.Format("IsaacWikiDicInstaller/{0} (https://gitee.com/frto027/isaac-wiki-dictionary; huiji_wiki_user:Frto027; 602706150@qq.com) .NetFramework/4.7.2", VERSION);
 
 
@@ -961,6 +961,12 @@ namespace WikiDictionaryPatcher
                 new FileInfo(RES_FOLDER_PATCH + @"\itempreview.anm2")
                     .CopyTo(res_folder + @"itempreview.anm2");
             }
+
+            //patch cc license image
+            new FileInfo(RES_FOLDER_PATCH + @"\cc_icon.anm2")
+                .CopyTo(res_folder + @"cc_icon.anm2");
+            new FileInfo(RES_FOLDER_PATCH + @"\cc_icon_80x15.png")
+                .CopyTo(res_folder + @"cc_icon_80x15.png");
         }
 
         private static void SaveQrCode(string path, Gma.QrCodeNet.Encoding.QrCode qrCode)
