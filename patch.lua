@@ -40,6 +40,7 @@ WikiDic.schoolBagId = nil -- we don't need to add offset for school bag in rep
 WikiDic.playerHasSchoolBagAfterbirth = false
 WikiDic.ccIconSprite = nil
 WikiDic.ccText = "This work (WikiDictionary) is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License."
+WikiDic.resPrefix = "wd_res/"
 
 WikiDic.huijiTQrCodeInfo = "双击Tab键（地图键）开关二维码显示"
 WikiDic.huijiWikiInfo = {
@@ -124,6 +125,10 @@ if WikiDic.useHuijiWiki then
 	table.insert(WikiDic.authTexts, "Wiki图鉴程序员：@frto027(bilibili/gitee/github), @frt-027(tieba)")
 else
 	table.insert(WikiDic.authTexts, "WikiDictionary programmer: @frto027(bilibili/gitee/github), @frt-027(tieba)")
+end
+
+if WikiDic.useRepModFolder then
+	WikiDic.resPrefix = "mods/IsaacWikiDictionary/resources/wd_res/"
 end
 
 WikiDic.desc = {
@@ -341,14 +346,14 @@ function WikiDic:InitFonts()
 		end
 
 		WikiDic.font = Font()
-		WikiDic.font:Load(WikiDic.useDefaultFont and "font/terminus.fnt" or "wd_res/font/wdic_font.fnt")
+		WikiDic.font:Load(WikiDic.useDefaultFont and "font/terminus.fnt" or WikiDic.resPrefix .. "font/wdic_font.fnt")
 		WikiDic:FixReturn(WikiDic.desc)
 		WikiDic:FixReturn(WikiDic.trinketDesc)
 		WikiDic:FixReturn(WikiDic.cardDesc)
 		WikiDic:FixReturn(WikiDic.pillDesc)
 		if WikiDic.renderQrcode then
 			WikiDic.qrcodeSprite = Sprite()
-			WikiDic.qrcodeSprite:Load("wd_res/qrcode/qrcode.anm2",true)
+			WikiDic.qrcodeSprite:Load(WikiDic.resPrefix .. "qrcode/qrcode.anm2",true)
 			WikiDic.qrcodeSprite:SetFrame("show",1)
 			WikiDic.qrcodeSprite.Color = Color(1,1,1,WikiDic.qrTransparent,0,0,0)
 			WikiDic.qrCodeIsTransparent = true
@@ -358,7 +363,7 @@ function WikiDic:InitFonts()
 		if WikiDic.showSpindownDice then
 			WikiDic.spindownDiceItemSprites = {Sprite(), Sprite(), Sprite(), Sprite(), Sprite()}
 			for _, s in pairs(WikiDic.spindownDiceItemSprites) do
-				s:Load("wd_res/itempreview.anm2",true)
+				s:Load(WikiDic.resPrefix .. "itempreview.anm2",true)
 				s:SetFrame("show",1)
 				s.Color = Color(1,1,1,WikiDic.textTransparent,0,0,0)
 				s.Scale = Vector(WikiDic.spindownDiceScale, WikiDic.spindownDiceScale)
@@ -366,7 +371,7 @@ function WikiDic:InitFonts()
 
 			-- draw spindown dice icon at 0
 			WikiDic.spindownDiceItemSprites[0] = Sprite()
-			WikiDic.spindownDiceItemSprites[0]:Load("wd_res/itempreview.anm2",true)
+			WikiDic.spindownDiceItemSprites[0]:Load(WikiDic.resPrefix .. "itempreview.anm2",true)
 			WikiDic.spindownDiceItemSprites[0]:SetFrame("show",1)
 			WikiDic.spindownDiceItemSprites[0].Color = Color(1,1,1,WikiDic.textTransparent,0,0,0)
 			WikiDic.spindownDiceItemSprites[0].Scale = Vector(WikiDic.spindownDiceScale, WikiDic.spindownDiceScale)
@@ -381,7 +386,7 @@ function WikiDic:InitFonts()
 		WikiDic.questionMarkSprite:LoadGraphics()
 
 		WikiDic.ccIconSprite = Sprite()
-		WikiDic.ccIconSprite:Load("wd_res/cc_icon.anm2", true)
+		WikiDic.ccIconSprite:Load(WikiDic.resPrefix .. "cc_icon.anm2", true)
 		WikiDic.ccIconSprite:SetFrame("show",1)
 		WikiDic.ccIconSprite.Scale = Vector(0.5, 0.5)
 		WikiDic.ccIconLineOffset = 80 * 0.5
@@ -561,7 +566,7 @@ function WikiDic:RenderCallback()
 				--replace qrcode sprite
 				if WikiDic.tabRenderToggle and WikiDic.renderQrcode then
 					contains_qrcode = true
-					local target_graph = "wd_res/qrcode/item_" .. tostring(entity_id) .. ".png"
+					local target_graph = WikiDic.resPrefix .. "qrcode/item_" .. tostring(entity_id) .. ".png"
 					if WikiDic.qrcodeGraph ~= target_graph then
 						WikiDic.qrcodeSprite:ReplaceSpritesheet(0,target_graph)
 						WikiDic.qrcodeSprite:LoadGraphics()
@@ -596,7 +601,7 @@ function WikiDic:RenderCallback()
 				--replace qrcode sprite
 				if WikiDic.tabRenderToggle and WikiDic.renderQrcode then
 					contains_qrcode = true
-					local target_graph = "wd_res/qrcode/trinket_" .. tostring(trinket_id) .. ".png"
+					local target_graph = WikiDic.resPrefix .. "qrcode/trinket_" .. tostring(trinket_id) .. ".png"
 					if WikiDic.qrcodeGraph ~= target_graph then
 						WikiDic.qrcodeSprite:ReplaceSpritesheet(0,target_graph)
 						WikiDic.qrcodeSprite:LoadGraphics()
@@ -649,4 +654,3 @@ end
 
 WikiDic:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE,WikiDic.Update)
 WikiDic:AddCallback(ModCallbacks.MC_POST_RENDER,WikiDic.RenderCallback)
-

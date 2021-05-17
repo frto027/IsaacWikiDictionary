@@ -1,5 +1,5 @@
 ﻿#if DEBUG
-//#define USE_DIRECT_WIKI_ACCESS
+#define USE_DIRECT_WIKI_ACCESS
 #define USE_LOCALHOST_DIRECT_WIKI_ACCESS
 #endif
 
@@ -38,6 +38,8 @@ namespace WikiDictionaryPatcher
         public bool showSpindownDice;
 
         public string textTransparent, qrTransparent;
+
+        public bool useRepModFolder;
     }
 
     class Program
@@ -126,8 +128,8 @@ namespace WikiDictionaryPatcher
                 }
                 gameExePath = dialog.FileName;
             }
-
-            if (!EnsureSteamGameVersion(gameExePath))
+            bool isRep;
+            if (!EnsureSteamGameVersion(gameExePath, out isRep))
                 return;
 
             bool patched = false;
@@ -152,6 +154,9 @@ namespace WikiDictionaryPatcher
                 }
             }
 
+            string rep_mod_path = gameExePath + "\\..\\mods\\IsaacWikiDictionary";
+            bool patched_mod_folder = new DirectoryInfo(rep_mod_path).Exists;
+
             if (patched)
             {
                 if(MessageBox.Show("检测到已经添加图鉴，是否移除图鉴？您可以移除图鉴后再次添加，以达到与wiki同步的效果。","是否移除图鉴？",MessageBoxButtons.YesNo) == DialogResult.No)
@@ -170,6 +175,23 @@ namespace WikiDictionaryPatcher
                     MessageBox.Show("图鉴已经移除");
                     return;
                 }
+            }
+
+            if (patched_mod_folder)
+            {
+                if (MessageBox.Show("检测到已经添加图鉴(mod方式)，是否移除图鉴？您可以移除图鉴后再次添加，以达到与wiki同步的效果。", "是否移除图鉴？", MessageBoxButtons.YesNo) == DialogResult.No)
+                {
+                    return;
+                }
+                try
+                {
+                    new DirectoryInfo(rep_mod_path).Delete(true);
+                }catch(Exception e)
+                {
+                    Console.WriteLine(e);
+                    MessageBox.Show("删除目录失败，请检查相关权限或报错信息。");
+                }
+                return;
             }
 
             Console.WriteLine("正在下载元数据...");
@@ -209,7 +231,7 @@ namespace WikiDictionaryPatcher
                 return;
             }
 
-            DicOptions options = new DicOptions() { canceled = false };
+            DicOptions options = new DicOptions() { canceled = false, useRepModFolder = isRep };
 
             new ConfigForm(options).ShowDialog();
 
@@ -312,7 +334,18 @@ namespace WikiDictionaryPatcher
                 d = d.Replace("\\", "\\\\").Replace("\n", "\\n").Replace("\"", "\\\"");
                 pill_desc += string.Format("[{0}]=\"{1}\",\n", item.Value.id, d);
             }
-            AddPatch(lua_path, desc_dict, trinket_desc,card_desc,pill_desc,descs.Values, trinket_descs.Values, options);
+
+            string target_lua_path = lua_path;
+            string res_folder = target_lua_path + @"\..\..\wd_res\";
+            if (options.useRepModFolder)
+            {
+                new DirectoryInfo(rep_mod_path).Create();
+                target_lua_path = rep_mod_path + "\\main.lua";
+                new FileInfo(target_lua_path).Create().Close();
+                res_folder = rep_mod_path + "\\resources\\wd_res\\";
+            }
+
+            AddPatch(target_lua_path,res_folder, desc_dict, trinket_desc,card_desc,pill_desc,descs.Values, trinket_descs.Values, options);
             MessageBox.Show("操作完成");
         }
 
@@ -791,7 +824,7 @@ namespace WikiDictionaryPatcher
             }
         }
 
-        private static void AddPatch(string luaName, string item_desc, string trinket_desc,string card_desc, string pill_desc, IEnumerable<ItemDesc> itemDescs,IEnumerable<ItemDesc> trinketDescs, DicOptions dicOptions)
+        private static void AddPatch(string luaName, string res_folder, string item_desc, string trinket_desc,string card_desc, string pill_desc, IEnumerable<ItemDesc> itemDescs,IEnumerable<ItemDesc> trinketDescs, DicOptions dicOptions)
         {
             string next = "";
             bool isPatching = false;
@@ -842,6 +875,7 @@ namespace WikiDictionaryPatcher
                             patch += "WikiDic.textTransparent = " + dicOptions.textTransparent + "\n";
                             patch += "WikiDic.qrTransparent = " + dicOptions.qrTransparent + "\n";
                             patch += "WikiDic.showSpindownDice = " + (dicOptions.showSpindownDice ? "true" : "false") + "\n";
+                            patch += "WikiDic.useRepModFolder = " + (dicOptions.useRepModFolder ? "true" : "false") + "\n";
                         }
                         else if (line == FAKE_TRINKET_DESC_CONTENT)
                         {
@@ -874,7 +908,6 @@ namespace WikiDictionaryPatcher
             }
 
             //create resource folder
-            string res_folder = luaName + @"\..\..\wd_res\";
             {
                 var res_dir = new DirectoryInfo(res_folder);
                 if (res_dir.Exists)
@@ -999,8 +1032,9 @@ namespace WikiDictionaryPatcher
             return version.huijiUrlPrefix + HttpUtility.UrlPathEncode(name) + " ? IsaacWikiDicVersion=" + VERSION;
         }
 
-        private static bool EnsureSteamGameVersion(string exePath)
+        private static bool EnsureSteamGameVersion(string exePath, out bool isRep)
         {
+            isRep = false;
             try
             {
                 var vdfFile = new FileInfo(exePath + @"\..\..\..\appmanifest_250900.acf");
@@ -1030,6 +1064,7 @@ namespace WikiDictionaryPatcher
                                 if (cfg[1] == "\"1426300\"")
                                 {
                                     Repentance = true;
+                                    isRep = true;
                                 }
                             }
                         }

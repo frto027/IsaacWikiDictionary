@@ -17,6 +17,8 @@ namespace WikiDictionaryPatcher
         {
             InitializeComponent();
             this.options = options;
+            this.useRepModFolderYes.Checked = options.useRepModFolder;
+            this.useRepModFolderNo.Checked = !options.useRepModFolder;
         }
 
         private void radioButton8_CheckedChanged(object sender, EventArgs e)
@@ -63,7 +65,7 @@ namespace WikiDictionaryPatcher
                 int p = qrTransparentBar.Value * 100 / qrTransparentBar.Maximum;
                 options.qrTransparent = p + "/100";
             }
-
+            options.useRepModFolder = useRepModFolderYes.Checked;
             Close();
         }
 

@@ -72,6 +72,9 @@
             this.SpindownDiceNo = new System.Windows.Forms.RadioButton();
             this.SpindownDiceYse = new System.Windows.Forms.RadioButton();
             this.label3 = new System.Windows.Forms.Label();
+            this.groupBox12 = new System.Windows.Forms.GroupBox();
+            this.useRepModFolderNo = new System.Windows.Forms.RadioButton();
+            this.useRepModFolderYes = new System.Windows.Forms.RadioButton();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -85,6 +88,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.qrTransparentBar)).BeginInit();
             this.groupBox10.SuspendLayout();
             this.groupBox11.SuspendLayout();
+            this.groupBox12.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -282,7 +286,7 @@
             // 
             // yseButton
             // 
-            this.yseButton.Location = new System.Drawing.Point(208, 452);
+            this.yseButton.Location = new System.Drawing.Point(394, 484);
             this.yseButton.Name = "yseButton";
             this.yseButton.Size = new System.Drawing.Size(75, 23);
             this.yseButton.TabIndex = 5;
@@ -292,7 +296,7 @@
             // 
             // cancelButton
             // 
-            this.cancelButton.Location = new System.Drawing.Point(289, 452);
+            this.cancelButton.Location = new System.Drawing.Point(485, 484);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
             this.cancelButton.TabIndex = 6;
@@ -488,7 +492,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(434, 452);
+            this.button1.Location = new System.Drawing.Point(289, 455);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(126, 23);
             this.button1.TabIndex = 10;
@@ -572,12 +576,46 @@
             this.label3.TabIndex = 11;
             this.label3.Text = "*未解锁物品会被Spindown Dice指示器显示，导致信息不准确";
             // 
+            // groupBox12
+            // 
+            this.groupBox12.Controls.Add(this.useRepModFolderNo);
+            this.groupBox12.Controls.Add(this.useRepModFolderYes);
+            this.groupBox12.Location = new System.Drawing.Point(5, 452);
+            this.groupBox12.Name = "groupBox12";
+            this.groupBox12.Size = new System.Drawing.Size(271, 55);
+            this.groupBox12.TabIndex = 7;
+            this.groupBox12.TabStop = false;
+            this.groupBox12.Text = "mod注入方式";
+            // 
+            // useRepModFolderNo
+            // 
+            this.useRepModFolderNo.AutoSize = true;
+            this.useRepModFolderNo.Location = new System.Drawing.Point(145, 20);
+            this.useRepModFolderNo.Name = "useRepModFolderNo";
+            this.useRepModFolderNo.Size = new System.Drawing.Size(95, 16);
+            this.useRepModFolderNo.TabIndex = 2;
+            this.useRepModFolderNo.Text = "注入游戏资源";
+            this.useRepModFolderNo.UseVisualStyleBackColor = true;
+            // 
+            // useRepModFolderYes
+            // 
+            this.useRepModFolderYes.AutoSize = true;
+            this.useRepModFolderYes.Checked = true;
+            this.useRepModFolderYes.Location = new System.Drawing.Point(18, 20);
+            this.useRepModFolderYes.Name = "useRepModFolderYes";
+            this.useRepModFolderYes.Size = new System.Drawing.Size(89, 16);
+            this.useRepModFolderYes.TabIndex = 1;
+            this.useRepModFolderYes.TabStop = true;
+            this.useRepModFolderYes.Text = "生成忏悔MOD";
+            this.useRepModFolderYes.UseVisualStyleBackColor = true;
+            // 
             // ConfigForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(576, 487);
+            this.ClientSize = new System.Drawing.Size(576, 514);
             this.ControlBox = false;
+            this.Controls.Add(this.groupBox12);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.groupBox11);
             this.Controls.Add(this.groupBox10);
@@ -621,6 +659,8 @@
             this.groupBox10.PerformLayout();
             this.groupBox11.ResumeLayout(false);
             this.groupBox11.PerformLayout();
+            this.groupBox12.ResumeLayout(false);
+            this.groupBox12.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -672,5 +712,8 @@
         private System.Windows.Forms.RadioButton SpindownDiceNo;
         private System.Windows.Forms.RadioButton SpindownDiceYse;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.GroupBox groupBox12;
+        private System.Windows.Forms.RadioButton useRepModFolderNo;
+        private System.Windows.Forms.RadioButton useRepModFolderYes;
     }
 }
