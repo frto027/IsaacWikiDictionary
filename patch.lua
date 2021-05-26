@@ -1,5 +1,7 @@
 WikiDic = RegisterMod("WikiDic",1)
 
+WikiDic.seeQuestionMark = false
+
 WikiDic.targetEntity = nil
 WikiDic.tDistance = 40
 WikiDic.offsetCenter = Vector(0,-30)
@@ -179,6 +181,12 @@ function WikiDic:SpriteIsQuestionmark(entitySprite, questionSprite)
 
 
 	return true
+end
+
+if WikiDic.seeQuestionMark then
+	WikiDic.SpriteIsQuestionmark = function()
+		return false
+	end
 end
 
 function WikiDic:IsQuestionMarkTexture(entity)
