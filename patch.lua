@@ -337,7 +337,7 @@ function WikiDic:InitFonts()
 	if WikiDic.font == nil then
 
 		-- get game version as EID
-		if Isaac.GetEntityTypeByName("Dogma") == 0 then
+		if not REPENTANCE then
 			-- game version is Afterbirth+
 			-- turn off
 			WikiDic.showSpindownDice = false
