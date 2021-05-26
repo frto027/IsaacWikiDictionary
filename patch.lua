@@ -210,7 +210,22 @@ function WikiDic:Update()
 	-- 	return
 	-- end
 
-	local tpos = WikiDic.usePlayerPos and Isaac.GetPlayer(0).Position or Input.GetMousePosition(true)
+	local tpos
+
+	if WikiDic.usePlayerPos then
+		tpos = Isaac.GetPlayer(0).Position
+	else
+		tpos = Input.GetMousePosition(true)
+		if WikiDic.IsMirrorRoom() then
+			local mouse_pos_world = tpos
+			local mouse_pos_render = Isaac.WorldToScreen(mouse_pos_world)
+			local middle_render = Isaac.WorldToRenderPosition(Vector(320,240))
+			local mouse_mirror_world = mouse_pos_world - 2 * Isaac.ScreenToWorldDistance(mouse_pos_render - middle_render)
+			mouse_mirror_world.Y = mouse_pos_world.Y
+			tpos = mouse_mirror_world	
+		end
+	end
+
 	for _,e in pairs(Isaac.GetRoomEntities()) do
 		if e.Type == 5 and (e.Variant == 100 or e.Variant == 350) then
 			if e.Variant == 100 and (e.SubType == 0 or (Game():GetLevel():GetCurses() & LevelCurse.CURSE_OF_BLIND) ~= 0) then
@@ -246,6 +261,13 @@ function WikiDic:Update()
 		-- "Glitched Crown" costs too much cpu if we judge the question mark in the previous loop
 		WikiDic.targetEntity = nil
 	end
+end
+
+function WikiDic:IsMirrorRoom()
+	local level = Game():GetLevel()
+	local room_desc = level:GetCurrentRoomDesc()
+	local is_mirror_room = room_desc.ListIndex == level:GetRoomByIdx(room_desc.GridIndex,1).ListIndex
+	return is_mirror_room
 end
 
 function WikiDic:FixReturn(descs)
