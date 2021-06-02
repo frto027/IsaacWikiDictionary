@@ -271,11 +271,19 @@ function WikiDic:Update()
 	end
 end
 
-function WikiDic:IsMirrorRoom()
+local isMirrorRoom = false
+function WikiDic:OnNewRoom()
+	-- 游戏又没有留接口
 	local level = Game():GetLevel()
 	local room_desc = level:GetCurrentRoomDesc()
-	local is_mirror_room = room_desc.ListIndex == level:GetRoomByIdx(room_desc.GridIndex,1).ListIndex
-	return is_mirror_room
+	if room_desc.GridIndex >= 0 then
+		isMirrorRoom = room_desc.ListIndex == level:GetRoomByIdx(room_desc.GridIndex,1).ListIndex
+	end
+	-- GridIndex小于0的地方是恶魔房、错误房、BossRush等房间，这些房间我们放弃判断，用前一个房间的判断结果（尽管读档后会在这个房间出现一次问题）
+end
+WikiDic:AddCallback(ModCallbacks.MC_POST_NEW_ROOM,WikiDic.OnNewRoom)
+function WikiDic:IsMirrorRoom()
+	return isMirrorRoom
 end
 
 function WikiDic:FixReturn(descs)
@@ -562,9 +570,12 @@ function WikiDic:RenderCallback()
 				local sprite = WikiDic.targetEntity:GetSprite()
 				-- I have to create a new vector, instead of use the old one.
 				local oldScale = Vector(sprite.Scale.X,sprite.Scale.Y)
+				local oldFlip = sprite.FlipX
 				sprite.Scale = WikiDic.iconScale
+				sprite.FlipX = WikiDic.IsMirrorRoom()
 				sprite:RenderLayer(1,next_line + icon_offset,WikiDic.nullVector,WikiDic.nullVector)
 				sprite.Scale = oldScale
+				sprite.FlipX = oldFlip
 
 				--update spindown dice item info
 				if WikiDic.playerHasSpindownDice then
@@ -624,9 +635,13 @@ function WikiDic:RenderCallback()
 				local icon_offset = WikiDic.trinketIconOffset
 				local sprite = WikiDic.targetEntity:GetSprite()
 				local oldScale = Vector(sprite.Scale.X,sprite.Scale.Y)
+				local oldFlip = sprite.FlipX
 				sprite.Scale = WikiDic.iconScale
+				sprite.FlipX = WikiDic.IsMirrorRoom()
 				sprite:RenderLayer(0,next_line + icon_offset,WikiDic.nullVector,WikiDic.nullVector)
 				sprite.Scale = oldScale
+				sprite.FlipX = oldFlip
+
 
 				--replace qrcode sprite
 				if WikiDic.tabRenderToggle and WikiDic.renderQrcode then
