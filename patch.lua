@@ -57,12 +57,7 @@ WikiDic.fandomWikiInfo = {
 }
 
 WikiDic.spindownDiceSkip = {
-	[656] = true,
-	[710] = true,
-	[711] = true,
-	[713] = true,
-	[714] = true,
-	[715] = true,
+	-- fill it in the init function
 }
 
 WikiDic.nullVector = Vector(0,0)
@@ -416,6 +411,12 @@ function WikiDic:InitFonts()
 			WikiDic.spindownDiceItemSprites[0]:ReplaceSpritesheet(0,WikiDic.ItemConfig:GetCollectible(WikiDic.spindownDiceId).GfxFileName)
 			WikiDic.spindownDiceItemSprites[0]:LoadGraphics()
 
+			for i = 1,3000 do
+				local cfg = WikiDic.ItemConfig:GetCollectible(i)
+				if (not cfg) or cfg.Hidden then
+					WikiDic.spindownDiceSkip[i] = true
+				end
+			end
 		end
 
 		WikiDic.questionMarkSprite = Sprite()
@@ -586,7 +587,7 @@ function WikiDic:RenderCallback()
 							local cur_entity = entity_id
 							local cur_sprites_i = 1
 							repeat
-								if ItemConfig.Config.IsValidCollectible(cur_entity) and not WikiDic.spindownDiceSkip[cur_entity] then
+								if not WikiDic.spindownDiceSkip[cur_entity] then
 									WikiDic.spindownDiceItemSprites[cur_sprites_i]:ReplaceSpritesheet(0,WikiDic.ItemConfig:GetCollectible(cur_entity).GfxFileName)
 									WikiDic.spindownDiceItemSprites[cur_sprites_i]:LoadGraphics()
 									cur_sprites_i = cur_sprites_i + 1
