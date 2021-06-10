@@ -1144,34 +1144,62 @@ namespace WikiDictionaryPatcher
                 }
 
                 var configFile = new FileInfo(steampath + @"\config\config.vdf");
-                if (configFile.Exists == false)
-                    return null;
-
-                using (var fs = configFile.OpenRead())
-                {
-                    using (var reader = new StreamReader(fs))
+                if (configFile.Exists != false)
+                    using (var fs = configFile.OpenRead())
                     {
-                        while(reader.ReadLine() is string line)
+                        using (var reader = new StreamReader(fs))
                         {
-                            var linearr = line.Trim('\t').Split(new string[] { "\t\t" },StringSplitOptions.RemoveEmptyEntries);
-                            if (linearr.Length != 2)
-                                continue;
-                            if (!linearr[0].StartsWith("\"BaseInstallFolder_"))
-                                continue;
-                            var libPath = linearr[1];
-                            if (libPath.Length < 2 || !libPath.StartsWith("\"") || !libPath.EndsWith("\""))
-                                continue;
-                            libPath = libPath.Substring(1, libPath.Length - 2);
+                            while (reader.ReadLine() is string line)
+                            {
+                                var linearr = line.Trim('\t').Split(new string[] { "\t\t" }, StringSplitOptions.RemoveEmptyEntries);
+                                if (linearr.Length != 2)
+                                    continue;
+                                if (!linearr[0].StartsWith("\"BaseInstallFolder_"))
+                                    continue;
+                                var libPath = linearr[1];
+                                if (libPath.Length < 2 || !libPath.StartsWith("\"") || !libPath.EndsWith("\""))
+                                    continue;
+                                libPath = libPath.Substring(1, libPath.Length - 2);
 
-                            //now, libPath is a steam library path
-                            var gamepath = CheckLibraryPath(libPath);
-                            if (gamepath != null)
-                                return gamepath;
+                                //now, libPath is a steam library path
+                                var gamepath = CheckLibraryPath(libPath);
+                                if (gamepath != null)
+                                    return gamepath;
 
+                            }
                         }
                     }
-                }
-            }catch(Exception) { }
+                var libraryFoldersConfigFile = new FileInfo(steampath + @"\config\libraryfolders.vdf");
+                if(libraryFoldersConfigFile.Exists)
+                using(var fs = libraryFoldersConfigFile.OpenRead())
+                    {
+                        using (var reader = new StreamReader(fs))
+                        {
+                            while (reader.ReadLine() is string line)
+                            {
+                                var linearr = line.Trim('\t').Split(new string[] { "\t\t" }, StringSplitOptions.RemoveEmptyEntries);
+                                if (linearr.Length != 2)
+                                    continue;
+                                if (!linearr[0].StartsWith("\"path"))
+                                    continue;
+                                var libPath = linearr[1];
+                                if (libPath.Length < 2 || !libPath.StartsWith("\"") || !libPath.EndsWith("\""))
+                                    continue;
+                                libPath = libPath.Substring(1, libPath.Length - 2);
+
+                                //now, libPath is a steam library path
+                                var gamepath = CheckLibraryPath(libPath);
+                                if (gamepath != null)
+                                    return gamepath;
+
+                            }
+                        }
+                    }
+
+
+            }
+            catch (Exception) { }
+
             return null;
         }
 #if DEBUG
