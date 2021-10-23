@@ -468,7 +468,7 @@ function WikiDic:RenderCallback()
 	local itemPool = Game():GetItemPool()
 	local pill_color = Isaac.GetPlayer(player_index):GetPill(0)
 	local card_hold = WikiDic.useHuijiWiki and map_btn_pressed and Isaac.GetPlayer(player_index):GetCard(0) or 0
-	local pill_hold = WikiDic.useHuijiWiki and map_btn_pressed and itemPool:IsPillIdentified(pill_color) and itemPool:GetPillEffect(pill_color) or -1
+	local pill_hold = WikiDic.useHuijiWiki and map_btn_pressed and itemPool:IsPillIdentified(pill_color) and itemPool:GetPillEffect(pill_color, Isaac.GetPlayer(player_index)) or -1
 	if pill_hold == 31 then
 		-- ??? pill
 		pill_hold = -1
